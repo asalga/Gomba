@@ -9,60 +9,56 @@
 public class SoundManager {
   boolean muted = false;
   Minim minim;
-
-  ArrayList <PlayerQueue> queuedSounds;
-  ArrayList <String> queuedSoundNames;
+  HashMap <String, Player> players;
 
   /*
-      Handles the issue where we want to play multiple audio streams from the same clip.
    */
-  private class PlayerQueue {
-    private ArrayList <AudioPlayer> players;
+  private class Player {
+    private ArrayList <AudioPlayer> channels;
     private String path;
 
-    public PlayerQueue(String audioPath) {
-
+    public Player(String audioPath) {
       path = audioPath;
-      players = new ArrayList<AudioPlayer>();
-      appendPlayer();
+      channels = new ArrayList<AudioPlayer>();
+      addChannel();
     }
 
     public void close() {
-      for (int i = 0; i < players.size(); i++) {
-        players.get(i).close();
+      for (int i = 0; i < channels.size(); i++) {
+        channels.get(i).close();
       }
     }
 
     public void play() {
-      int freePlayerIndex = -1;
-      for (int i = 0; i < players.size(); i++) {
-        if (players.get(i).isPlaying() == false) {
-          freePlayerIndex = i;
+      int freeChannelIndex = -1;
+      for (int i = 0; i < channels.size(); i++) {
+        if (channels.get(i).isPlaying() == false) {
+          freeChannelIndex = i;
           break;
         }
       }
 
-      if (freePlayerIndex == -1) {
-        appendPlayer();
-        freePlayerIndex = players.size()-1;
+      if (freeChannelIndex == -1) {
+        addChannel();
+        freeChannelIndex = channels.size()-1;
       }
 
-      players.get(freePlayerIndex).play();
-      players.get(freePlayerIndex).rewind();
+      channels.get(freeChannelIndex).play();
+      channels.get(freeChannelIndex).rewind();
     }
 
-    private void appendPlayer() {
+    private void addChannel() {
       AudioPlayer player = minim.loadFile(path);
-      players.add(player);
+      channels.add(player);
     }
 
     public void setMute(boolean m) {
-      for (int i = 0; i < players.size(); i++) {
+      for (int i = 0; i < channels.size(); i++) {
         if (m) {
-          players.get(i).mute();
+          channels.get(i).mute();
         }
         else {
-          players.get(i).unmute();
+          channels.get(i).unmute();
         }
       }
     }
@@ -72,9 +68,7 @@ public class SoundManager {
   */
   public SoundManager(PApplet applet) {
     minim = new Minim(applet);
-
-    queuedSounds = new ArrayList<PlayerQueue>();
-    queuedSoundNames = new ArrayList<String>();
+    players = new HashMap<String, Player>();
   }
 
   /*
@@ -82,8 +76,8 @@ public class SoundManager {
   public void setMute(boolean isMuted) {
     muted = isMuted;
 
-    for (int i = 0; i < queuedSounds.size(); i++) {
-      queuedSounds.get(i).setMute(muted);
+    for(String key : players.keySet()){
+      players.get(key).setMute(muted);
     }
   }
 
@@ -93,20 +87,10 @@ public class SoundManager {
     return muted;
   }
 
-  /*private void play(AudioPlayer player){
-   if(muted || player.isPlaying()){
-   return;
-   }
-   
-   player.play();
-   player.rewind();
-   }*/
-
   /*
   */
   public void addSound(String soundName) {
-    queuedSounds.add(new PlayerQueue("audio/" + soundName + ".wav"));
-    queuedSoundNames.add(soundName);
+    players.put(soundName, new Player("audio/" + soundName + ".wav"));
   }
 
   /*
@@ -116,29 +100,18 @@ public class SoundManager {
       return;
     }
 
-    int index = -1;
-
-    for (int i = 0; i < queuedSoundNames.size(); i++) {
-      if (soundName.equals(queuedSoundNames.get(i))) {
-        index = i;
-        break;
-      }
-    }
-
-    if (index != -1) {
-      queuedSounds.get(index).play();
-    }
+    if(players.containsKey(soundName)){
+      players.get(soundName).play();
+    }  
   }
 
   /*
   */
   public void stop() {
-
-    for (int i = 0; i < queuedSounds.size(); i++) {
-      queuedSounds.get(i).close();
+    for(String key : players.keySet()){
+      players.get(key).close();
     }
 
     minim.stop();
   }
 }
-
