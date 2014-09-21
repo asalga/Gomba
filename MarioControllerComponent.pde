@@ -19,9 +19,6 @@ class MarioControllerComponent extends Component {
   MarioControllerComponent() {
     super();
     componentName = "MarioControllerComponent";
-    //position = new PVector(gameObject.position.x, gameObject.position.y);
-    //32, height - 200);
-
     _isJumping = false;
     _isIdle = true;
     isRunning = false;
@@ -29,15 +26,10 @@ class MarioControllerComponent extends Component {
 
   void awake() {
     super.awake();
-    //position = new PVector(gameObject.position.x, gameObject.position.y);
-
     animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-
     physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.setHasFriction(true);
   }
-
-  // 1) prevent moving mario while constantly jumping
 
   void update(float dt) {
     // TODO: fix
@@ -90,7 +82,7 @@ class MarioControllerComponent extends Component {
   void jump() {
     if (canJump()) {
       physics.applyForce(0, jumpForce);
-      soundManager.playSound("fireball");
+      soundManager.playSound("smb_jumpsmall");
       animation.play("jump");
       _isJumping = true;
     }

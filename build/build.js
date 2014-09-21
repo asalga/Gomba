@@ -46,7 +46,7 @@ void setup() {
   soundManager = new SoundManager(this);
 
   // TODO: fix
-  soundManager.addSound("fireball");
+  soundManager.addSound("smb_jumpsmall");
   soundManager.addSound("coin_pickup");
   soundManager.addSound("pause");
   soundManager.addSound("bump");
@@ -468,7 +468,7 @@ class CoinCollisionComponent extends CollisionComponent {
 
   void onCollision(GameObject other) {    
     if (other.name == "player") {
-      //soundManager.playSound("coin_pickup");
+      soundManager.playSound("coin_pickup");
       gameObject.slateForRemoval();
     }
   }
@@ -540,9 +540,6 @@ class MarioControllerComponent extends Component {
   MarioControllerComponent() {
     super();
     componentName = "MarioControllerComponent";
-    //position = new PVector(gameObject.position.x, gameObject.position.y);
-    //32, height - 200);
-
     _isJumping = false;
     _isIdle = true;
     isRunning = false;
@@ -550,15 +547,10 @@ class MarioControllerComponent extends Component {
 
   void awake() {
     super.awake();
-    //position = new PVector(gameObject.position.x, gameObject.position.y);
-
     animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-
     physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.setHasFriction(true);
   }
-
-  // 1) prevent moving mario while constantly jumping
 
   void update(float dt) {
     // TODO: fix
@@ -611,7 +603,7 @@ class MarioControllerComponent extends Component {
   void jump() {
     if (canJump()) {
       physics.applyForce(0, jumpForce);
-      soundManager.playSound("fireball");
+      soundManager.playSound("smb_jumpsmall");
       animation.play("jump");
       _isJumping = true;
     }
@@ -1519,9 +1511,8 @@ function SoundManager() {
     console.log(sounds[i]);
     sounds[i].preload = 'auto';
     sounds[i].load();
-    sounds[i].setAttribute('autoplay', 'autoplay');
+    //sounds[i].setAttribute('autoplay', 'autoplay');
     soundNames[i] = soundName;
-    document.body.appendChild(sounds[i]);
   }
 
   /*

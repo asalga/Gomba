@@ -46,7 +46,7 @@ void setup() {
   soundManager = new SoundManager(this);
 
   // TODO: fix
-  soundManager.addSound("fireball");
+  soundManager.addSound("smb_jumpsmall");
   soundManager.addSound("coin_pickup");
   soundManager.addSound("pause");
   soundManager.addSound("bump");

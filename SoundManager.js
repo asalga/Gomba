@@ -35,9 +35,8 @@ function SoundManager() {
     console.log(sounds[i]);
     sounds[i].preload = 'auto';
     sounds[i].load();
-    sounds[i].setAttribute('autoplay', 'autoplay');
+    //sounds[i].setAttribute('autoplay', 'autoplay');
     soundNames[i] = soundName;
-    document.body.appendChild(sounds[i]);
   }
 
   /*

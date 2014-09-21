@@ -10,7 +10,7 @@ class CoinCollisionComponent extends CollisionComponent {
 
   void onCollision(GameObject other) {    
     if (other.name == "player") {
-      //soundManager.playSound("coin_pickup");
+      soundManager.playSound("coin_pickup");
       gameObject.slateForRemoval();
     }
   }
