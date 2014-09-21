@@ -21,4 +21,4 @@ Alternatively, you can just play here: [asalga.github.io/Gomba](http://asalga.gi
 Blog Posts
 ----------
 
-[http://asalga.wordpress.com/2014/09/20/gomba-0-1/](0.1 Release)
+[0.1 Release](http://asalga.wordpress.com/2014/09/20/gomba-0-1/)
