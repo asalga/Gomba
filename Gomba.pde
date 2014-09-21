@@ -42,6 +42,7 @@ void setup() {
 
   scene = new Scene();
   debug = new Debugger();
+  debug.setOn(false);
   soundManager = new SoundManager(this);
 
   // TODO: fix
@@ -51,7 +52,7 @@ void setup() {
   soundManager.addSound("bump");
   // soundManager.setMute(true);
 
-  debugOn = true;
+  debugOn = false;
 
   Keyboard.lockKeys(new int[] {
     KEY_P, 
