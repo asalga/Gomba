@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:e89ec025930d993f415d6a7d66fb21ec$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+-->
+<TextureAtlas imagePath="data/atlas_2x.png" width="256" height="256">
+    <sprite n="chars/goomba/dead.png" x="0" y="0" w="32" h="32"/>
+    <sprite n="chars/goomba/walk0.png" x="33" y="0" w="32" h="32"/>
+    <sprite n="chars/goomba/walk1.png" x="66" y="0" w="32" h="32"/>
+    <sprite n="chars/mario/idle.png" x="99" y="0" w="32" h="32"/>
+    <sprite n="chars/mario/jump.png" x="132" y="0" w="34" h="32"/>
+    <sprite n="chars/mario/walk0.png" x="167" y="0" w="32" h="32"/>
+    <sprite n="chars/mario/walk1.png" x="200" y="0" w="32" h="32"/>
+    <sprite n="chars/mario/walk2.png" x="0" y="33" w="32" h="32"/>
+    <sprite n="chars/spiney/fall0.png" x="33" y="33" w="32" h="32"/>
+    <sprite n="chars/spiney/fall1.png" x="66" y="33" w="32" h="32"/>
+    <sprite n="chars/spiney/walk0.png" x="99" y="33" w="32" h="32"/>
+    <sprite n="chars/spiney/walk1.png" x="132" y="33" w="32" h="32"/>
+    <sprite n="props/clouds/cloud1.png" x="165" y="33" w="64" h="48"/>
+    <sprite n="props/clouds/cloud2.png" x="0" y="82" w="96" h="48"/>
+    <sprite n="props/clouds/cloud3.png" x="97" y="82" w="128" h="48"/>
+    <sprite n="props/coin/coin0.png" x="0" y="131" w="32" h="32"/>
+    <sprite n="props/coin/coin1.png" x="33" y="131" w="32" h="32"/>
+    <sprite n="props/coin/coin2.png" x="66" y="131" w="32" h="32"/>
+    <sprite n="props/coin/coin3.png" x="99" y="131" w="32" h="32"/>
+    <sprite n="props/coinbox/coinbox1.png" x="132" y="131" w="32" h="32"/>
+    <sprite n="props/mushrooms/murshroom_red.png" x="165" y="131" w="32" h="32"/>
+    <sprite n="props/mushrooms/mushroom_green.png" x="198" y="131" w="32" h="32"/>
+    <sprite n="props/structure/bricks.png" x="0" y="164" w="32" h="32"/>
+    <sprite n="props/structure/ground.png" x="33" y="164" w="32" h="32"/>
+    <sprite n="props/structure/tile.png" x="66" y="164" w="32" h="32"/>
+</TextureAtlas>
