@@ -1,1 +1,5 @@
 .DS_Store
+web-export/
+sketch.properties
+build-tmp/
+
