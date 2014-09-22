@@ -82,7 +82,7 @@ class MarioControllerComponent extends Component {
   void jump() {
     if (canJump()) {
       physics.applyForce(0, jumpForce);
-      soundManager.playSound("smb_jumpsmall");
+      soundManager.playSound("jump");
       animation.play("jump");
       _isJumping = true;
     }

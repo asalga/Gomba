@@ -17,6 +17,7 @@ class MarioCollisionComponent extends CollisionComponent {
 
   void onCollisionExit(GameObject other) {
   }
+  
   void onCollisionEnter(GameObject other) {
   }
 }
