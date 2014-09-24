@@ -1,78 +1,59 @@
-/////////////////
-// SoundManager
-/////////////////
-function SoundManager() {
+var SoundManager = (function() {
 
-  var muted;
+    function SoundManager() {
+        this.muted = false;
+        this.BASE_PATH = "data/audio/";
+        this.players = {};
 
-  var BASE_PATH = "data/audio/";
+        this.Player = (function() {
+            var audio;
 
-  var sounds = [];
-  var soundNames = [];
+            function Player(path) {
+		        this.audio = document.createElement('audio');
+			    this.audio.setAttribute('src', "data/audio/" + path + ".ogg");
+			    this.audio.preload = 'auto';
+			    this.audio.load();
 
-  /*
-  *
-   */
-  this.setMute = function(mute) {
-    muted = mute;
-  };
+                this.play = function() {
+                    console.log("Player play called");
+                    try {
+				    	this.audio.volume = 1;
+				    	this.audio.play();
+				    	this.audio.currentTime = 0;
+				    }
+				    catch(e) {
+				      console.log("Could not play audio file: " + e);
+				    }
+                };
 
-  /*
-  */
-  this.isMuted = function() {
-    return muted;
-  };
+                this.setMute = function() {
+                };
 
-  /*
-  */
-  this.stop = function() {
-  }
+                this.addChannel = function() {
+                };
+            }
+            return Player;
+        }());
 
-  this.addSound = function(soundName) {
-    var i = sounds.push(document.createElement('audio')) - 1;
-    console.log(i);
-    sounds[i].setAttribute('src', BASE_PATH + soundName + ".ogg");
-    console.log(sounds[i]);
-    sounds[i].preload = 'auto';
-    sounds[i].load();
-    //sounds[i].setAttribute('autoplay', 'autoplay');
-    soundNames[i] = soundName;
-  }
+        this.setMute = function() {
+        };
 
-  /*
-  */
-  this.playSound = function(soundName) {
-    console.log("play audio");
-    var soundID = -1;
+        this.isMuted = function() {
+            return this.muted;
+        };
 
-    if (muted) {
-      return;
+        this.addSound = function(soundName) {
+            this.players[soundName] = new this.Player(soundName);
+        };
+
+        this.playSound = function(soundName) {
+            if(this.players[soundName]){
+            	this.players[soundName].play();
+            }
+        };
+
+        this.stop = function() {
+        };
     }
-
-    for (var i = 0; i < sounds.length; i++) {
-      if (soundNames[i] === soundName) {
-        soundID = i;
-        break;
-      }
-    }
-
-    // return early if the soundName wasn't found to prevent AOOB
-    if (soundID === -1) {
-      return;
-    }
-
-    sounds[soundID].volume = 1.0;
-
-    // Safari does not want to play sounds...??
-    try {
-      console.log(sounds[soundID]);
-      sounds[soundID].volume = 1.0;
-      sounds[soundID].play();
-      sounds[soundID].currentTime = 0;
-    }
-    catch(e) {
-      console.log("Could not play audio file: " + e);
-    }
-  };
-}
-
+    return SoundManager;
+}());

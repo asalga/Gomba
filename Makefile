@@ -30,7 +30,6 @@ minify:
 		GoombaCollisionComponent.pde    \
 		GoombaControllerComponent.pde   \
 		MarioCollisionComponent.pde     \
-		SoundManager.js                 \
 		GameObject.pde                  \
 		SpriteControllerComponent.pde   \
 		GameObjectFactory.pde           \
