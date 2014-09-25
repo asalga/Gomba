@@ -8727,7 +8727,7 @@ var requestAnimFrame = (function() {
               //throw e_loop;
             //}
           }
-          requestAnimationFrame(loopFunction, p.canvas);
+          requestAnimFrame(loopFunction, p.canvas);
         }
         else{
           loopStarted = false;
