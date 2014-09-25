@@ -46,10 +46,10 @@ void setup() {
   soundManager = new SoundManager(this);
 
   // TODO: fix
-  soundManager.addSound("jump");
-  soundManager.addSound("coin_pickup");
-  soundManager.addSound("pause");
-  soundManager.addSound("bump");
+  soundManager.addSound("jump", 2);
+  soundManager.addSound("coin_pickup", 7);
+  soundManager.addSound("pause", 1);
+  soundManager.addSound("bump", 1);
   // soundManager.setMute(true);
 
   debugOn = false;

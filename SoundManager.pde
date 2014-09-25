@@ -88,8 +88,10 @@ public class SoundManager {
   }
 
   /*
+    We handle multiple audio channels in js via
+    and extra argument, which we don't need here
   */
-  public void addSound(String soundName) {
+  public void addSound(String soundName, int dummy) {
     players.put(soundName, new Player("audio/" + soundName + ".wav"));
   }
 
