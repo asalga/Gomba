@@ -42,7 +42,6 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
       else{
         scene.load();
       }
-
     }
   }
 }

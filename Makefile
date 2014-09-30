@@ -9,30 +9,25 @@ minify:
 		AnimationComponent.pde          \
 		ArtManager.pde                  \
 		AtlasParser.pde                 \
-		BrickCollisionComponent.pde     \
 		AtlasParserJSON.js              \
 		AtlasParserXML.js               \
 		BoundingBoxComponent.pde        \
-		BoundingBoxYComponent.pde       \
 		BoundingBoxXComponent.pde       \
+		BoundingBoxYComponent.pde       \
 		CameraComponent.pde             \
-		GroundCollisionComponent.pde    \
-		MarioControllerComponent.pde    \
-		PhysicsComponent.pde            \
-		CollisionComponent.pde          \
 		CollisionManager.pde           	\
-		PatrolEnemyPhysicsComponent.pde \
 		Component.pde                  	\
-		Debugger.pde                    \
 		CreatureBoundingBoxComponent.pde\
-		Keyboard.pde                    \
-		BrickCollisionComponent.pde     \
-		GoombaCollisionComponent.pde    \
-		GoombaControllerComponent.pde   \
+		Debugger.pde                    \
 		GameObject.pde                  \
-		SpriteControllerComponent.pde   \
 		GameObjectFactory.pde           \
+		GoombaControllerComponent.pde   \
+		Keyboard.pde                    \
+		MarioControllerComponent.pde    \
+		PatrolEnemyPhysicsComponent.pde \
+		PhysicsComponent.pde            \
 		Scene.pde                       \
+		SpriteControllerComponent.pde   \
 		Timer.pde                       \
 		Utils.js                        \
 		WrapAroundComponent.pde	> build/build.js

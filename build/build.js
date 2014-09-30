@@ -236,45 +236,6 @@ interface AtlasParser {
   void load(String metaFile);
   HashMap<String, PImage> getImages();
 }
-////////////////////////////
-// BrickCollisionComponent
-////////////////////////////
-class BrickCollisionComponent extends CollisionComponent {
-  boolean c;
-
-  BrickCollisionComponent() {
-    super();
-    c = false;
-    //componentName = "BrickCollisionComponent";
-  }
-
-  void onCollision(GameObject other) {
-    super.onCollision(other);
-  }
-
-  void onCollisionEnter(GameObject other) {
-    super.onCollisionEnter(other);		
-
-    // Get controller
-    if (other.name == "player") {
-    }
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-
-  void render() {
-    if (c) {
-      pushStyle();
-      fill(0, 255, 100, 100);
-      strokeWeight(9);
-      stroke(233, 0, 0, 120);
-      rect(gameObject.position.x, -gameObject.position.y, TILE_SIZE, TILE_SIZE);
-      popStyle();
-    }
-  }
-}
-
 ////////////////////
 // AtlasParserJSON
 ////////////////////
@@ -391,11 +352,40 @@ class BoundingBoxComponent extends Component {
   }
 
   void onCollisionEnter(GameObject other) {
-    colliders.put(""+other.id, other);
+    colliders.put("" + other.id, other);
   }
 
   void onCollisionExit(GameObject other) {
-    colliders.remove(""+other.id);
+    colliders.remove("" + other.id);
+  }
+}
+//////////////////////////
+// BoundingBoxXComponent
+//////////////////////////
+class BoundingBoxXComponent extends BoundingBoxComponent {
+
+  BoundingBoxXComponent() {
+    super();
+    componentName = "BoundingBoxComponent";
+  }
+
+  void onCollision(GameObject other) {
+  }
+
+  void onCollisionExit(GameObject other) {
+    super.onCollisionExit(other);
+  }
+  
+  void onCollisionEnter(GameObject other) {
+    super.onCollisionEnter(other);
+    
+    if (other.hasTag("enemy")) {
+      scene.load();
+    }
+    if(other.name == "coin"){
+      soundManager.playSound("coin_pickup");
+      other.slateForRemoval();
+    }
   }
 }
 //////////////////////////
@@ -442,36 +432,6 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
       else{
         scene.load();
       }
-
-    }
-  }
-}
-//////////////////////////
-// BoundingBoxXComponent
-//////////////////////////
-class BoundingBoxXComponent extends BoundingBoxComponent {
-
-  BoundingBoxXComponent() {
-    super();
-    componentName = "BoundingBoxComponent";
-  }
-
-  void onCollision(GameObject other) {
-  }
-
-  void onCollisionExit(GameObject other) {
-    super.onCollisionExit(other);
-  }
-  
-  void onCollisionEnter(GameObject other) {
-    super.onCollisionEnter(other);
-    
-    if (other.hasTag("enemy")) {
-      scene.load();
-    }
-    if(other.name == "coin"){
-      soundManager.playSound("coin_pickup");
-      other.slateForRemoval();
     }
   }
 }
@@ -540,45 +500,903 @@ class CameraComponent extends Component {
   }
 }
 
-/////////////////////////////
-// GroundCollisionComponent
-/////////////////////////////
-class GroundCollisionComponent extends CollisionComponent {
-  boolean collision = false;
+/////////////////////
+// CollisionManager
+/////////////////////
+class CollisionManager {
 
-  GroundCollisionComponent() {
-    super();
-    //componentName = "BrickCollisionComponent";
+  static final int NONE       = 0;
+  static final int PLAYER     = 1;
+  static final int STRUCTURE  = 2;
+  static final int ENEMY      = 4;
+  static final int PICKUP     = 8;
+
+  HashMap<String, GameObject[]> collisions;
+  ArrayList<GameObject> gameObjects;
+  ArrayList<String> toRemove;
+
+  CollisionManager() {
+    gameObjects = new ArrayList<GameObject>();
+    collisions = new HashMap<String, GameObject[]> ();
+    toRemove = new ArrayList<String>();
   }
 
-  void onCollision(GameObject other) {
-    collision = true;
+  void add(GameObject go) {
+    gameObjects.add(go);
+  }
+
+  void removeDeadObjects() {
+    for (int i = gameObjects.size()-1; i >= 0; i--) {
+      GameObject go = gameObjects.get(i);
+      if (go.requiresRemoval) {
+        gameObjects.remove(i);
+      }
+    }
+  }
+
+  // 
+  void checkForCollisionExits() {
+
+    for (String key : collisions.keySet()) {
+
+      GameObject[] pair = collisions.get(key);
+
+      BoundingBoxComponent bb0 = (BoundingBoxComponent)pair[0].getComponent("BoundingBoxComponent");
+      BoundingBoxComponent bb1 = (BoundingBoxComponent)pair[1].getComponent("BoundingBoxComponent");
+
+      if(bb0 == null || bb1 == null){
+        continue;
+      }
+
+      if (testCollisionWithTouch(bb0, bb1) == false) {
+        bb0.onCollisionExit(pair[1]);
+        bb1.onCollisionExit(pair[0]);
+        toRemove.add(hashObjectPair(pair[0], pair[1]));
+      }
+    }
+
+    for (int i = 0; i < toRemove.size(); i++) {
+      collisions.remove(toRemove.get(i));
+    }
+    toRemove.clear();
+  }
+
+  void checkForCollisions() {
+    debug.addString("num collision objects: " + gameObjects.size());
+
+    if (gameObjects.size() < 2) {
+      return;
+    }
+
+    numCollisionTests = 0;
+    numCollisionTestsSkipped = 0;
+
+    int numObjects = gameObjects.size();
+
+    // If any collisions no longer collide
+    checkForCollisionExits();
+
+    // Now, check for new collisions.
+    for (int i = 0; i < numObjects-1; i++) {
+      for (int j = i+1; j < numObjects; j++) {
+
+        GameObject obj1 = gameObjects.get(i);
+        GameObject obj2 = gameObjects.get(j);
+
+        // turn to iterator
+        ArrayList<Component> bbList1 = obj1.getComponentList("BoundingBoxComponent");
+        ArrayList<Component> bbList2 = obj2.getComponentList("BoundingBoxComponent");
+
+        if(bbList1 == null || bbList2 == null){
+          continue;
+        }
+
+        for(int bbList1Index = 0; bbList1Index < bbList1.size(); bbList1Index++){
+          BoundingBoxComponent bb1 = (BoundingBoxComponent)bbList1.get(bbList1Index);
+   
+          for(int bbList2Index = 0; bbList2Index < bbList2.size(); bbList2Index++){
+            BoundingBoxComponent bb2 = (BoundingBoxComponent)bbList2.get(bbList2Index);
+
+            if(bb1 == null || bb2 == null){
+              continue;
+            }
+
+            // Check the masks
+            if ((bb1.type & bb2.mask) == 0) {
+              numCollisionTestsSkipped++;
+              continue;
+            }
+
+            numCollisionTests++;
+            if (testCollisionWithTouch(bb1, bb2)) {
+
+              String hash = hashObjectPair(obj1, obj2);
+
+              // First time these two are colliding
+              if (collisions.containsKey(hash) == false) {
+                bb1.onCollisionEnter(obj2);
+                bb2.onCollisionEnter(obj1);
+                
+                collisions.put(hash, new GameObject[] { 
+                  obj1, obj2
+                }
+                );
+              }
+              else {
+                bb1.onCollision(obj2);
+                bb2.onCollision(obj1);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  String hashObjectPair(GameObject g0, GameObject g1) {
+    String hash = "";
+
+    if (g0.id < g1.id) {
+      hash = ("" + g0.id) + ("" + g1.id);
+    }
+    else {
+      hash = ("" + g1.id) + ("" + g0.id);
+    }
+
+    return hash;
+  }
+}
+//////////////
+// Component
+//////////////
+class Component {
+
+  protected String componentName;
+  protected GameObject gameObject;
+  protected String name;
+  protected boolean enabled;
+
+  Component() {
+    componentName = "Component";
+    gameObject = null;
+    name = "";
+    enabled = true;
+  }
+
+  void update(float dt) {
   }
 
   void render() {
-    float x = gameObject.position.x;
-    float y = gameObject.position.y;
-
-    if (collision && debugOn) {
-      pushStyle();
-      strokeWeight(1);
-
-      fill(0, 20, 150, 150);
-      stroke(255, 0, 0);
-
-
-      rect(x, -y, TILE_SIZE, TILE_SIZE);
-      popStyle();
-
-      collision = false;
-    }
   }
-  void onCollisionEnter(GameObject other) {
+
+  void awake() {
+  }
+
+  GameObject getGameObject() {
+    return gameObject;
+  }
+
+  void setGameObject(GameObject go) {
+    gameObject = go;
+  }
+
+  String getComponentName() {
+    return componentName;
+  }
+
+  void setName(String n) {
+    name = n;
+  }
+
+  String getname() {
+    return name;
+  }
+
+  boolean isEnabled() {
+    return enabled;
+  }
+}
+
+/////////////////////////////
+// CreatureBoundingBoxComponent
+/////////////////////////////
+class CreatureBoundingBoxComponent extends BoundingBoxComponent {
+
+  // Spiney can't be squashed
+  boolean killsMarioOnSquash = true;
+  public boolean _fallsOffLedge;
+  PhysicsComponent phy;
+
+  CreatureBoundingBoxComponent() {
+    super();
+    componentName = "BoundingBoxComponent";
+    _fallsOffLedge = false;
+  }
+
+  void onCollision(GameObject other) {
+    //If (mario is invinsible){
+    //  kick sprite
+    //}
   }
 
   void onCollisionExit(GameObject other) {
+    super.onCollisionExit(other);
+
+    // if we are no longer colliding with anything, then fall
+    if (colliders.isEmpty()) {
+      phy.setGroundY(TILE_SIZE);
+      phy.setTouhcingFloor(false);
+    }
+  }
+
+  void onCollisionEnter(GameObject other) {
+    super.onCollisionEnter(other);
+
+    if(other.hasTag("mario")) {
+      MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
+      if(mario != null && killsMarioOnSquash){
+        scene.load();
+      }
+    }
+
+    //
+    if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
+      phy.setGroundY(other.position.y);
+      phy.setTouhcingFloor(true);
+    }
+
+    // If hit side of something, reversedirection
+    // gameObject.slateForRemoval();
+
+    // If hit the top of something, land()
+  }
+
+  void awake() {
+    super.awake();
+    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+  }
+
+  boolean doesFallsOffLedge() {
+    return _fallsOffLedge;
   }
 }
+/////////////
+// Debugger
+/////////////
+class Debugger {
+  private ArrayList strings;
+  private PFont font;
+  private int fontSize;
+  private boolean isOn;
+
+  public Debugger() {
+    isOn = true;
+    strings = new ArrayList();
+    fontSize = 15;
+    font = createFont("Arial", fontSize);
+  }
+
+  public void addString(String s) {
+    if (isOn) {
+      strings.add(s);
+    }
+  }
+
+  /*
+   * Should be called after every frame
+   */
+  public void clear() {
+    strings.clear();
+  }
+
+  /**
+   If the debugger is off, it will ignore calls to addString and draw saving
+   some processing time.
+   */
+  public void toggle() {
+    isOn = !isOn;
+  }
+
+  public void setOn(boolean on) {
+    isOn = on;
+  }
+
+  public void render() {
+    if (isOn) {
+      int y = 20;
+      fill(255);
+      for (int i = 0; i < strings.size(); i++, y+=fontSize) {
+        textFont(font);
+        text((String)strings.get(i), 0, y);
+      }
+    }
+  }
+}
+///////////////
+// GameObject
+///////////////
+class GameObject {
+  PVector position;
+  String name;
+  ArrayList<String> tags;
+  HashMap<String, ArrayList<Component> > components;
+  boolean requiresRemoval;
+  int id;
+
+  GameObject() {
+    position = new PVector();
+    name = "";
+    components = new HashMap<String, ArrayList<Component>>();
+    tags = new ArrayList<String>();
+    requiresRemoval = false;
+    id = Utils.getNextID();
+  }
+
+  void addComponent(Component component) {
+    component.setGameObject(this);
+
+    ArrayList<Component> list = components.get(component.getComponentName());
+    if(list == null){
+      list = new ArrayList<Component>();
+      list.add(component);
+      components.put(component.getComponentName(), list);
+    }
+    else{
+      list.add(component);
+    }
+  }
+
+  /*
+    legacy
+  */
+  Component getComponent(String s) {
+    ArrayList<Component> c = components.get(s);
+    if(c != null){
+      return c.get(0);  
+    }
+    return null;
+  }
+
+  ArrayList<Component> getComponentList(String s) {
+    return components.get(s);
+  }
+
+  void addTag(String t) {
+    tags.add(t);
+  }
+
+  boolean hasTag(String s) {
+    for (int i = 0; i < tags.size(); i++) {
+      if (tags.get(i) == s) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void removeComponent(String name) {
+    components.remove(name);
+  }
+
+  void awake() {
+    Component c;
+    for (String key : components.keySet()) {
+      ArrayList<Component> list = components.get(key);
+      for(int i = 0; i < list.size(); i++){
+        list.get(i).awake();  
+      }
+    }
+  }
+
+  void update(float dt) {
+    Component c;
+    ArrayList <Component> list;
+    for (String key : components.keySet()) {
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).update(dt);
+          }
+        }
+      }
+    }
+  }
+
+  boolean haTag(String tag) {
+    for (int i = 0; i < tags.size(); i++) {
+      if (tags.get(i) == tag) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  PVector getPosition() {
+    return position;
+  }
+
+  void setPosition(float x, float y) {
+    position.x = x;
+    position.y = y;
+  }
+
+  void render() {
+    Component c;
+    ArrayList <Component> list;
+    for (String key : components.keySet()) {
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).render();
+          }
+        }
+      }
+    }
+  }
+
+  void slateForRemoval() {
+    requiresRemoval = true;
+  }
+}
+//////////////////////
+// GameObjectFactory
+//////////////////////
+class GameObjectFactory {
+
+  public GameObject create(String id) {
+
+    // PLAYER
+    if (id == "player") {
+      GameObject player = new GameObject();
+      player.name = "player";
+
+      PhysicsComponent physicsComp = new PhysicsComponent();
+      physicsComp.setMaxXSpeed(300);
+      // physicsComp.setVelocity(30, 0);
+
+      AnimationComponent aniComp = new AnimationComponent();
+
+      AnimationClip jumpClip = new AnimationClip();
+      jumpClip.addFrame("chars/mario/jump.png");
+      aniComp.addClip("jump", jumpClip);
+
+      AnimationClip idleClip = new AnimationClip();
+      idleClip.addFrame("chars/mario/idle.png");  
+      aniComp.addClip("idle", idleClip);
+      aniComp.play("idle");
+
+      AnimationClip walkClip = new AnimationClip();
+      walkClip.setFrameTime(0.1);
+      for (int i = 0; i < 3; ++i) {
+        walkClip.addFrame("chars/mario/walk" + i + ".png");
+      }
+      aniComp.addClip("walk", walkClip);
+
+      MarioControllerComponent controller = new MarioControllerComponent();
+      player.addComponent(controller);
+
+      BoundingBoxYComponent yBoundingBox = new BoundingBoxYComponent();
+      yBoundingBox.w = TILE_SIZE - TILE_SIZE/2;
+      yBoundingBox.h = TILE_SIZE;
+      yBoundingBox.setOffsets(8, 0);
+
+      BoundingBoxXComponent xBoundingBox = new BoundingBoxXComponent();
+      xBoundingBox.w = TILE_SIZE;
+      xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
+      xBoundingBox.setOffsets(0, - 8);
+
+      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      yBoundingBox.type = CollisionManager.PLAYER;
+
+      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      xBoundingBox.type = CollisionManager.PLAYER;
+
+      // 
+      player.addComponent(physicsComp);
+      player.addComponent(aniComp);
+      //player.addComponent(collisionComp);
+      
+      player.addComponent(yBoundingBox);
+      player.addComponent(xBoundingBox);
+      
+      return player;
+    }
+
+    //
+    // COIN
+    //
+    else if (id == "coin") {
+      GameObject coin = new GameObject();
+      coin.name = "coin";
+
+      AnimationClip idleClip = new AnimationClip();
+      for (int i = 0; i < 4; i++) {
+        idleClip.addFrame("props/coin/" + "coin" + i + ".png");
+      }
+      idleClip.setFrameTime(0.25);
+
+      AnimationComponent aniComp = new AnimationComponent();
+      aniComp.addClip("idle", idleClip);
+      aniComp.play("idle");
+
+      BoundingBoxComponent bbComp = new BoundingBoxComponent();
+      bbComp.w = 10;
+      bbComp.h = 20;
+      bbComp.setOffsets(11, -6);
+      bbComp.mask = CollisionManager.PLAYER;
+      bbComp.type = CollisionManager.PICKUP;
+
+      coin.addComponent(aniComp);
+      coin.addComponent(bbComp);
+
+      return coin;
+    }
+
+    //
+    // GROUND
+    //
+    else if (id == "ground") {
+      GameObject ground = new GameObject();
+      WrapAroundComponent c = new WrapAroundComponent();
+      c.imgPath = "props/structure/ground.png";
+      ground.addComponent(c);
+
+      // For now, reduce collision checks and use a 'fake' ground in physics comp.
+      /*BoundingBoxComponent boxComp = new BoundingBoxComponent();
+       boxComp.w = TILE_SIZE;
+       boxComp.h = TILE_SIZE;
+       ground.addComponent(boxComp);
+       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+       boxComp.type = CollisionManager.STRUCTURE;
+       GroundCollisionComponent collisionComp = new GroundCollisionComponent();
+       ground.addComponent(collisionComp);*/
+
+      return ground;
+    }
+
+    //
+    // CLOUD
+    //
+    else if (id == "cloud") {
+      GameObject cloud = new GameObject();
+      WrapAroundComponent c = new WrapAroundComponent();
+      c.imgPath = "props/clouds/cloud1.png";
+      c.extraBuffer = TILE_SIZE * 9;
+      cloud.position.y = height - TILE_SIZE;
+      cloud.addComponent(c);
+      return cloud;
+    }
+
+    //
+    // BRICK
+    //
+    else if ( id == "brick") {
+      GameObject brick = new GameObject();
+      WrapAroundComponent c = new WrapAroundComponent();
+      c.imgPath = "props/structure/bricks.png";
+
+      BoundingBoxComponent boxComp = new BoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.STRUCTURE;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+
+      brick.addComponent(boxComp);
+      brick.addComponent(c);
+      return brick;
+    }
+
+    //
+    // GOOMBA
+    //
+    else if (id == "goomba") {
+      GameObject goomba = new GameObject();
+      goomba.addTag("enemy");
+      goomba.name = "goomba";
+
+      AnimationComponent aniComp = new AnimationComponent();
+      goomba.addComponent(aniComp);
+
+      AnimationClip walkClip = new AnimationClip();
+      walkClip.setFrameTime(0.25);
+      walkClip.addFrame("chars/goomba/walk0.png");
+      walkClip.addFrame("chars/goomba/walk1.png");
+      aniComp.addClip("walk", walkClip);
+      aniComp.play("walk");
+
+      AnimationClip squashed = new AnimationClip();
+      squashed.addFrame("chars/goomba/dead.png");
+      aniComp.addClip("squashed", squashed);
+
+      GoombaControllerComponent controlComp = new GoombaControllerComponent();
+      //controlComp.walk();
+      goomba.addComponent(controlComp);
+
+      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
+      //physics.setMaxXSpeed(32);
+      //physics.setVelocity(-32, 0);
+      physics.setGravity(0, -100);
+      goomba.addComponent(physics);
+
+      //SpriteControllerComponent sprite = new SpriteControllerComponent();
+      // set properties....
+      // ....
+      // ....
+      //goomba.addComponent(sprite);
+      
+      /*PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
+       physics.setMaxXSpeed(32);
+       physics.setVelocity(32, 0);
+       goomba.addComponent(physics);*/
+
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.ENEMY;
+      boxComp.killsMarioOnSquash = false;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
+      goomba.addComponent(boxComp);
+
+      return goomba;
+    }
+
+    //
+    // SPINEY
+    //
+    else if (id == "spiney") {
+      GameObject spiney = new GameObject();
+      spiney.addTag("enemy");
+      spiney.name = "spiney";
+
+      AnimationComponent aniComp = new AnimationComponent();
+      spiney.addComponent(aniComp);
+
+      AnimationClip walkClip = new AnimationClip();
+      walkClip.setFrameTime(0.25);
+      walkClip.addFrame("chars/spiney/walk0.png");
+      walkClip.addFrame("chars/spiney/walk1.png");
+      aniComp.addClip("walk", walkClip);
+      aniComp.play("walk");
+
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.ENEMY;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
+      spiney.addComponent(boxComp);
+
+      SpriteControllerComponent sprite = new SpriteControllerComponent();
+      sprite.squashable = false;
+      spiney.addComponent(sprite);
+
+      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
+      //physics.setMaxXSpeed(32);
+      //physics.setVelocity(-32, 0);
+      physics.setGravity(0, -100);
+      spiney.addComponent(physics);
+
+      return spiney;
+    }
+    return null;
+  }
+}
+//////////////////////////////
+// GoombaControllerComponent
+//////////////////////////////
+class GoombaControllerComponent extends SpriteControllerComponent {
+
+  AnimationComponent animationComponent;
+  Timer deathTimer;
+
+  GoombaControllerComponent() {
+    // TODO: fix
+    super();
+    componentName = "SpriteControllerComponent";
+    deathTimer = null;
+  }
+
+  void awake() {
+    super.awake();
+    animationComponent = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+  }
+
+  void squash() {
+    animationComponent.play("squashed");
+    deathTimer = new Timer();
+    isAlive = false;
+    //gameObject.velocity.set(0,0);
+    gameObject.removeComponent("PhysicsComponent");
+    gameObject.removeComponent("BoundingBoxComponent");
+  }
+
+  void update(float dt) {
+    if(deathTimer != null){
+      deathTimer.tick();
+      if(deathTimer.getTotalTime() > 0.5){
+        gameObject.slateForRemoval();
+      }
+    }
+  }
+
+  void render() {
+  }
+}
+/////////////
+// Keyboard
+/////////////
+public static class Keyboard {
+
+  private static final int NUM_KEYS = 128;
+
+  // Locking keys are good for toggling things.
+  // After locking a key, when a user presses and releases a key, it will register and
+  // being 'down' (even though it has been released). Once the user presses it again,
+  // it will register as 'up'.
+  private static boolean[] lockableKeys = new boolean[NUM_KEYS];
+
+  // Use char since we only need to store 2 states (0, 1)
+  private static char[] lockedKeyPresses = new char[NUM_KEYS];
+
+  // The key states, true if key is down, false if key is up.
+  private static boolean[] keys = new boolean[NUM_KEYS];
+
+  /*
+   * The specified keys will stay down even after user releases the key.
+   * Once they press that key again, only then will the key state be changed to up(false).
+   */
+  public static void lockKeys(int[] keys) {
+    for (int k : keys) {
+      if (isValidKey(k)) {
+        lockableKeys[k] = true;
+      }
+    }
+  }
+
+  /*
+   * TODO: if the key was locked and is down, then we unlock it, it needs to 'pop' back up.
+   */
+  public static void unlockKeys(int[] keys) {
+    for (int k : keys) {
+      if (isValidKey(k)) {
+        lockableKeys[k] = false;
+      }
+    }
+  }
+
+  /* This is for the case when we want to start off the game
+   * assuming a key is already down.
+   */
+  public static void setVirtualKeyDown(int key, boolean state) {
+    setKeyDown(key, true);
+    setKeyDown(key, false);
+  }
+
+  /**
+   */
+  private static boolean isValidKey(int key) {
+    return (key > -1 && key < NUM_KEYS);
+  }
+
+  /*
+   * Set the state of a key to either down (true) or up (false)
+   */
+  public static void setKeyDown(int key, boolean state) {
+
+    if (isValidKey(key)) {
+
+      // If the key is lockable, as soon as we tell the class the key is down, we lock it.
+      if ( lockableKeys[key] ) {
+        // First time pressed
+        if (state == true && lockedKeyPresses[key] == 0) {
+          lockedKeyPresses[key]++;
+          keys[key] = true;
+        }
+        // First time released
+        else if (state == false && lockedKeyPresses[key] == 1) {
+          lockedKeyPresses[key]++;
+        }
+        // Second time pressed
+        else if (state == true && lockedKeyPresses[key] == 2) {
+          lockedKeyPresses[key]++;
+        }
+        // Second time released
+        else if (state == false && lockedKeyPresses[key] == 3) {
+          lockedKeyPresses[key] = 0;
+          keys[key] = false;
+        }
+      }
+      else {
+        keys[key] = state;
+      }
+    }
+  }
+
+  /* 
+   * Returns true if the specified key is down.
+   */
+  public static boolean isKeyDown(int key) {
+    return keys[key];
+  }
+}
+
+// These are outside of keyboard simply because I don't want to keep
+// typing Keyboard.KEY_* in the main Tetrissing.pde file
+final int KEY_BACKSPACE = 8;
+final int KEY_TAB       = 9;
+final int KEY_ENTER     = 10;
+
+final int KEY_SHIFT     = 16;
+final int KEY_CTRL      = 17;
+final int KEY_ALT       = 18;
+
+final int KEY_CAPS      = 20;
+final int KEY_ESC = 27;
+
+final int KEY_SPACE  = 32;
+final int KEY_PGUP   = 33;
+final int KEY_PGDN   = 34;
+final int KEY_END    = 35;
+final int KEY_HOME   = 36;
+
+final int KEY_LEFT   = 37;
+final int KEY_UP     = 38;
+final int KEY_RIGHT  = 39;
+final int KEY_DOWN   = 40;
+
+final int KEY_0 = 48;
+final int KEY_1 = 49;
+final int KEY_2 = 50;
+final int KEY_3 = 51;
+final int KEY_4 = 52;
+final int KEY_5 = 53;
+final int KEY_6 = 54;
+final int KEY_7 = 55;
+final int KEY_8 = 56;
+final int KEY_9 = 57;
+
+final int KEY_A = 65;
+final int KEY_B = 66;
+final int KEY_C = 67;
+final int KEY_D = 68;
+final int KEY_E = 69;
+final int KEY_F = 70;
+final int KEY_G = 71;
+final int KEY_H = 72;
+final int KEY_I = 73;
+final int KEY_J = 74;
+final int KEY_K = 75;
+final int KEY_L = 76;
+final int KEY_M = 77;
+final int KEY_N = 78;
+final int KEY_O = 79;
+final int KEY_P = 80;
+final int KEY_Q = 81;
+final int KEY_R = 82;
+final int KEY_S = 83;
+final int KEY_T = 84;
+final int KEY_U = 85;
+final int KEY_V = 86;
+final int KEY_W = 87;
+final int KEY_X = 88;
+final int KEY_Y = 89;
+final int KEY_Z = 90;
+
+// Function keys
+final int KEY_F1  = 112;
+final int KEY_F2  = 113;
+final int KEY_F3  = 114;
+final int KEY_F4  = 115;
+final int KEY_F5  = 116;
+final int KEY_F6  = 117;
+final int KEY_F7  = 118;
+final int KEY_F8  = 119;
+final int KEY_F9  = 120;
+final int KEY_F10 = 121;
+final int KEY_F12 = 122;
+
+//final int KEY_INSERT = 155;
 
 //////////////////////////
 // MarioControllerComponent
@@ -703,6 +1521,33 @@ class MarioControllerComponent extends Component {
   // TODO: later add if touching platform
   boolean canJump() {
     return physics.isTouchingFloor();
+  }
+}
+
+////////////////////////////////
+// PatrolEnemyPhysicsComponent
+////////////////////////////////
+class PatrolEnemyPhysicsComponent extends PhysicsComponent {
+
+  PatrolEnemyPhysicsComponent() {
+    super();
+    //componentName = "PatrolEnemyPhysicsComponent";		
+
+    setVelocity(-32, 0);
+    setMaxXSpeed(32);
+    setHasFriction(false);
+  }
+
+  void awake() {
+    super.awake();
+    position = new PVector(gameObject.position.x, gameObject.position.y);
+  }
+
+  void update(float dt) {
+    super.update(dt);
+  }
+
+  void render() {
   }
 }
 
@@ -889,1086 +1734,6 @@ class PhysicsComponent extends Component {
   }
 }
 
-///////////////////////
-// CollisionComponent  
-///////////////////////
-class CollisionComponent extends Component {
-
-  HashMap<String, GameObject> colliders;
-
-  CollisionComponent() {
-    super();
-    componentName = "CollisionComponent";
-    colliders = new HashMap<String, GameObject>();
-  }
-
-  void onCollision(GameObject other) {
-  }
-
-  void onCollisionEnter(GameObject other) {
-    colliders.put(""+other.id, other);
-  }
-
-  void onCollisionExit(GameObject other) {
-    colliders.remove(""+other.id);
-  }
-}
-
-/////////////////////
-// CollisionManager
-/////////////////////
-class CollisionManager {
-
-  static final int NONE       = 0;
-  static final int PLAYER     = 1;
-  static final int STRUCTURE  = 2;
-  static final int ENEMY      = 4;
-  static final int PICKUP     = 8;
-
-  HashMap<String, GameObject[]> collisions;
-  ArrayList<GameObject> gameObjects;
-  ArrayList<String> toRemove;
-
-  CollisionManager() {
-    gameObjects = new ArrayList<GameObject>();
-    collisions = new HashMap<String, GameObject[]> ();
-    toRemove = new ArrayList<String>();
-  }
-
-  void add(GameObject go) {
-    gameObjects.add(go);
-  }
-
-  void removeDeadObjects() {
-    for (int i = gameObjects.size()-1; i >= 0; i--) {
-      GameObject go = gameObjects.get(i);
-      if (go.requiresRemoval) {
-        gameObjects.remove(i);
-      }
-    }
-  }
-
-  // 
-  void checkForCollisionExits() {
-
-    for (String key : collisions.keySet()) {
-
-      GameObject[] pair = collisions.get(key);
-
-      BoundingBoxComponent bb0 = (BoundingBoxComponent)pair[0].getComponent("BoundingBoxComponent");
-      BoundingBoxComponent bb1 = (BoundingBoxComponent)pair[1].getComponent("BoundingBoxComponent");
-
-      if(bb0 == null || bb1 == null){
-        continue;
-      }
-
-      if (testCollisionWithTouch(bb0, bb1) == false) {
-        bb0.onCollisionExit(pair[1]);
-        bb1.onCollisionExit(pair[0]);
-        toRemove.add(hashObjectPair(pair[0], pair[1]));
-      }
-    }
-
-    for (int i = 0; i < toRemove.size(); i++) {
-      collisions.remove(toRemove.get(i));
-    }
-    toRemove.clear();
-  }
-
-  void checkForCollisions() {
-    debug.addString("num collision objects: " + gameObjects.size());
-
-    if (gameObjects.size() < 2) {
-      return;
-    }
-
-    numCollisionTests = 0;
-    numCollisionTestsSkipped = 0;
-
-    int numObjects = gameObjects.size();
-
-    // If any collisions no longer collide
-    checkForCollisionExits();
-
-    // Now, check for new collisions.
-    for (int i = 0; i < numObjects-1; i++) {
-      for (int j = i+1; j < numObjects; j++) {
-
-        GameObject obj1 = gameObjects.get(i);
-        GameObject obj2 = gameObjects.get(j);
-
-        // turn to iterator
-        ArrayList<Component> bbList1 = obj1.getComponentList("BoundingBoxComponent");
-        ArrayList<Component> bbList2 = obj2.getComponentList("BoundingBoxComponent");
-
-        if(bbList1 == null || bbList2 == null){
-          continue;
-        }
-
-        for(int bbList1Index = 0; bbList1Index < bbList1.size(); bbList1Index++){
-          BoundingBoxComponent bb1 = (BoundingBoxComponent)bbList1.get(bbList1Index);
-   
-          for(int bbList2Index = 0; bbList2Index < bbList2.size(); bbList2Index++){
-            BoundingBoxComponent bb2 = (BoundingBoxComponent)bbList2.get(bbList2Index);
-
-            if(bb1 == null || bb2 == null){
-              continue;
-            }
-
-            // Check the masks
-            if ((bb1.type & bb2.mask) == 0) {
-              numCollisionTestsSkipped++;
-              continue;
-            }
-
-            numCollisionTests++;
-            if (testCollisionWithTouch(bb1, bb2)) {
-
-              String hash = hashObjectPair(obj1, obj2);
-
-              // First time these two are colliding
-              if (collisions.containsKey(hash) == false) {
-                bb1.onCollisionEnter(obj2);
-                bb2.onCollisionEnter(obj1);
-                
-                collisions.put(hash, new GameObject[] { 
-                  obj1, obj2
-                }
-                );
-              }
-              else {
-                bb1.onCollision(obj2);
-                bb2.onCollision(obj1);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  String hashObjectPair(GameObject g0, GameObject g1) {
-    String hash = "";
-
-    if (g0.id < g1.id) {
-      hash = ("" + g0.id) + ("" + g1.id);
-    }
-    else {
-      hash = ("" + g1.id) + ("" + g0.id);
-    }
-
-    return hash;
-  }
-}
-////////////////////////////////
-// PatrolEnemyPhysicsComponent
-////////////////////////////////
-class PatrolEnemyPhysicsComponent extends PhysicsComponent {
-
-  PatrolEnemyPhysicsComponent() {
-    super();
-    //componentName = "PatrolEnemyPhysicsComponent";		
-
-    setVelocity(-32, 0);
-    setMaxXSpeed(32);
-    setHasFriction(false);
-  }
-
-  void awake() {
-    super.awake();
-    position = new PVector(gameObject.position.x, gameObject.position.y);
-  }
-
-  void update(float dt) {
-    super.update(dt);
-  }
-
-  void render() {
-  }
-}
-
-//////////////
-// Component
-//////////////
-class Component {
-
-  protected String componentName;
-  protected GameObject gameObject;
-  protected String name;
-  protected boolean enabled;
-
-  Component() {
-    componentName = "Component";
-    gameObject = null;
-    name = "";
-    enabled = true;
-  }
-
-  void update(float dt) {
-  }
-
-  void render() {
-  }
-
-  void awake() {
-  }
-
-  GameObject getGameObject() {
-    return gameObject;
-  }
-
-  void setGameObject(GameObject go) {
-    gameObject = go;
-  }
-
-  String getComponentName() {
-    return componentName;
-  }
-
-  void setName(String n) {
-    name = n;
-  }
-
-  String getname() {
-    return name;
-  }
-
-  boolean isEnabled() {
-    return enabled;
-  }
-}
-
-/////////////
-// Debugger
-/////////////
-class Debugger {
-  private ArrayList strings;
-  private PFont font;
-  private int fontSize;
-  private boolean isOn;
-
-  public Debugger() {
-    isOn = true;
-    strings = new ArrayList();
-    fontSize = 15;
-    font = createFont("Arial", fontSize);
-  }
-
-  public void addString(String s) {
-    if (isOn) {
-      strings.add(s);
-    }
-  }
-
-  /*
-   * Should be called after every frame
-   */
-  public void clear() {
-    strings.clear();
-  }
-
-  /**
-   If the debugger is off, it will ignore calls to addString and draw saving
-   some processing time.
-   */
-  public void toggle() {
-    isOn = !isOn;
-  }
-
-  public void setOn(boolean on) {
-    isOn = on;
-  }
-
-  public void render() {
-    if (isOn) {
-      int y = 20;
-      fill(255);
-      for (int i = 0; i < strings.size(); i++, y+=fontSize) {
-        textFont(font);
-        text((String)strings.get(i), 0, y);
-      }
-    }
-  }
-}
-/////////////////////////////
-// SpineyCollisionComponent
-/////////////////////////////
-class CreatureBoundingBoxComponent extends BoundingBoxComponent {
-
-  // Spiney can't be squashed
-  boolean killsMarioOnSquash = true;
-  public boolean _fallsOffLedge;
-  PhysicsComponent phy;
-
-  CreatureBoundingBoxComponent() {
-    super();
-    componentName = "BoundingBoxComponent";
-        //super();
-    _fallsOffLedge = false;
-  }
-
-  void onCollision(GameObject other) {
-    //If (mario is invinsible){
-    //  kick sprite
-    //}
-  }
-
-  void onCollisionExit(GameObject other) {
-    super.onCollisionExit(other);
-
-    // if we are no longer colliding with anything, then fall
-    if (colliders.isEmpty()) {
-      phy.setGroundY(TILE_SIZE);
-      phy.setTouhcingFloor(false);
-    }
-  }
-
-  void onCollisionEnter(GameObject other) {
-    super.onCollisionEnter(other);
-
-    if(other.hasTag("mario")) {
-      MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-    //  mario.hurt();
-
-      // mario game controller 
-      // if dead,
-      //scene.load();
-    }
-
-     // TODO: get collision Type
-
-    //
-    if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
-      phy.setGroundY(other.position.y);
-      phy.setTouhcingFloor(true);
-    }
-
-    // If hit side of something, reversedirection
-    // gameObject.slateForRemoval();
-
-    // If hit the top of something, land()
-  }
-
-  void awake() {
-    super.awake();
-    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-  }
-
-    boolean doesFallsOffLedge() {
-    return _fallsOffLedge;
-  }
-}
-/////////////
-// Keyboard
-/////////////
-public static class Keyboard {
-
-  private static final int NUM_KEYS = 128;
-
-  // Locking keys are good for toggling things.
-  // After locking a key, when a user presses and releases a key, it will register and
-  // being 'down' (even though it has been released). Once the user presses it again,
-  // it will register as 'up'.
-  private static boolean[] lockableKeys = new boolean[NUM_KEYS];
-
-  // Use char since we only need to store 2 states (0, 1)
-  private static char[] lockedKeyPresses = new char[NUM_KEYS];
-
-  // The key states, true if key is down, false if key is up.
-  private static boolean[] keys = new boolean[NUM_KEYS];
-
-  /*
-   * The specified keys will stay down even after user releases the key.
-   * Once they press that key again, only then will the key state be changed to up(false).
-   */
-  public static void lockKeys(int[] keys) {
-    for (int k : keys) {
-      if (isValidKey(k)) {
-        lockableKeys[k] = true;
-      }
-    }
-  }
-
-  /*
-   * TODO: if the key was locked and is down, then we unlock it, it needs to 'pop' back up.
-   */
-  public static void unlockKeys(int[] keys) {
-    for (int k : keys) {
-      if (isValidKey(k)) {
-        lockableKeys[k] = false;
-      }
-    }
-  }
-
-  /* This is for the case when we want to start off the game
-   * assuming a key is already down.
-   */
-  public static void setVirtualKeyDown(int key, boolean state) {
-    setKeyDown(key, true);
-    setKeyDown(key, false);
-  }
-
-  /**
-   */
-  private static boolean isValidKey(int key) {
-    return (key > -1 && key < NUM_KEYS);
-  }
-
-  /*
-   * Set the state of a key to either down (true) or up (false)
-   */
-  public static void setKeyDown(int key, boolean state) {
-
-    if (isValidKey(key)) {
-
-      // If the key is lockable, as soon as we tell the class the key is down, we lock it.
-      if ( lockableKeys[key] ) {
-        // First time pressed
-        if (state == true && lockedKeyPresses[key] == 0) {
-          lockedKeyPresses[key]++;
-          keys[key] = true;
-        }
-        // First time released
-        else if (state == false && lockedKeyPresses[key] == 1) {
-          lockedKeyPresses[key]++;
-        }
-        // Second time pressed
-        else if (state == true && lockedKeyPresses[key] == 2) {
-          lockedKeyPresses[key]++;
-        }
-        // Second time released
-        else if (state == false && lockedKeyPresses[key] == 3) {
-          lockedKeyPresses[key] = 0;
-          keys[key] = false;
-        }
-      }
-      else {
-        keys[key] = state;
-      }
-    }
-  }
-
-  /* 
-   * Returns true if the specified key is down.
-   */
-  public static boolean isKeyDown(int key) {
-    return keys[key];
-  }
-}
-
-// These are outside of keyboard simply because I don't want to keep
-// typing Keyboard.KEY_* in the main Tetrissing.pde file
-final int KEY_BACKSPACE = 8;
-final int KEY_TAB       = 9;
-final int KEY_ENTER     = 10;
-
-final int KEY_SHIFT     = 16;
-final int KEY_CTRL      = 17;
-final int KEY_ALT       = 18;
-
-final int KEY_CAPS      = 20;
-final int KEY_ESC = 27;
-
-final int KEY_SPACE  = 32;
-final int KEY_PGUP   = 33;
-final int KEY_PGDN   = 34;
-final int KEY_END    = 35;
-final int KEY_HOME   = 36;
-
-final int KEY_LEFT   = 37;
-final int KEY_UP     = 38;
-final int KEY_RIGHT  = 39;
-final int KEY_DOWN   = 40;
-
-final int KEY_0 = 48;
-final int KEY_1 = 49;
-final int KEY_2 = 50;
-final int KEY_3 = 51;
-final int KEY_4 = 52;
-final int KEY_5 = 53;
-final int KEY_6 = 54;
-final int KEY_7 = 55;
-final int KEY_8 = 56;
-final int KEY_9 = 57;
-
-final int KEY_A = 65;
-final int KEY_B = 66;
-final int KEY_C = 67;
-final int KEY_D = 68;
-final int KEY_E = 69;
-final int KEY_F = 70;
-final int KEY_G = 71;
-final int KEY_H = 72;
-final int KEY_I = 73;
-final int KEY_J = 74;
-final int KEY_K = 75;
-final int KEY_L = 76;
-final int KEY_M = 77;
-final int KEY_N = 78;
-final int KEY_O = 79;
-final int KEY_P = 80;
-final int KEY_Q = 81;
-final int KEY_R = 82;
-final int KEY_S = 83;
-final int KEY_T = 84;
-final int KEY_U = 85;
-final int KEY_V = 86;
-final int KEY_W = 87;
-final int KEY_X = 88;
-final int KEY_Y = 89;
-final int KEY_Z = 90;
-
-// Function keys
-final int KEY_F1  = 112;
-final int KEY_F2  = 113;
-final int KEY_F3  = 114;
-final int KEY_F4  = 115;
-final int KEY_F5  = 116;
-final int KEY_F6  = 117;
-final int KEY_F7  = 118;
-final int KEY_F8  = 119;
-final int KEY_F9  = 120;
-final int KEY_F10 = 121;
-final int KEY_F12 = 122;
-
-//final int KEY_INSERT = 155;
-
-////////////////////////////
-// BrickCollisionComponent
-////////////////////////////
-class BrickCollisionComponent extends CollisionComponent {
-  boolean c;
-
-  BrickCollisionComponent() {
-    super();
-    c = false;
-    //componentName = "BrickCollisionComponent";
-  }
-
-  void onCollision(GameObject other) {
-    super.onCollision(other);
-  }
-
-  void onCollisionEnter(GameObject other) {
-    super.onCollisionEnter(other);		
-
-    // Get controller
-    if (other.name == "player") {
-    }
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-
-  void render() {
-    if (c) {
-      pushStyle();
-      fill(0, 255, 100, 100);
-      strokeWeight(9);
-      stroke(233, 0, 0, 120);
-      rect(gameObject.position.x, -gameObject.position.y, TILE_SIZE, TILE_SIZE);
-      popStyle();
-    }
-  }
-}
-
-////////////////////////////
-// GoombaCollisionComponent
-////////////////////////////
-class GoombaCollisionComponent extends CollisionComponent {
-
-  GoombaCollisionComponent() {
-    // TODO: fix
-    super();
-    componentName = "CollisionComponent";
-  }
-
-  void onCollision(GameObject other) {
-    if (other.name == "mario" ||  other.name == "player") {
-      //EnemyControllerComponent e = (EnemyControllerComponent)gameObject.findComponent("EnemyControllerComponent");
-      //GoombaControllerComponent s = (GoombaControllerComponent)gameObject.findComponent("SpriteControllerComponent");
-      //e.squash();
-    }
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-  void onCollisionEnter(GameObject other) {
-  }
-}
-
-//////////////////////////////
-// GoombaControllerComponent
-//////////////////////////////
-class GoombaControllerComponent extends SpriteControllerComponent {
-
-  AnimationComponent animationComponent;
-  Timer deathTimer;
-
-  GoombaControllerComponent() {
-    // TODO: fix
-    super();
-    componentName = "SpriteControllerComponent";
-    deathTimer = null;
-  }
-
-  void awake() {
-    super.awake();
-    animationComponent = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-  }
-
-  void squash() {
-    animationComponent.play("squashed");
-    deathTimer = new Timer();
-    isAlive = false;
-    //gameObject.velocity.set(0,0);
-    gameObject.removeComponent("PhysicsComponent");
-    gameObject.removeComponent("BoundingBoxComponent");
-  }
-
-  void update(float dt) {
-    if(deathTimer != null){
-      deathTimer.tick();
-      if(deathTimer.getTotalTime() > 0.5){
-        gameObject.slateForRemoval();
-      }
-    }
-  }
-
-  void render() {
-  }
-}
-///////////////
-// GameObject
-///////////////
-class GameObject {
-  PVector position;
-  String name;
-  ArrayList<String> tags;
-  HashMap<String, ArrayList<Component> > components;
-  boolean requiresRemoval;
-  int id;
-
-  GameObject() {
-    position = new PVector();
-    name = "";
-    components = new HashMap<String, ArrayList<Component>>();
-    tags = new ArrayList<String>();
-    requiresRemoval = false;
-    id = Utils.getNextID();
-  }
-
-  void addComponent(Component component) {
-    component.setGameObject(this);
-
-    ArrayList<Component> list = components.get(component.getComponentName());
-    if(list == null){
-      list = new ArrayList<Component>();
-      list.add(component);
-      components.put(component.getComponentName(), list);
-    }
-    else{
-      list.add(component);
-    }
-  }
-
-  /*
-    legacy
-  */
-  Component getComponent(String s) {
-    ArrayList<Component> c = components.get(s);
-    if(c != null){
-      return c.get(0);  
-    }
-    return null;
-  }
-
-  ArrayList<Component> getComponentList(String s) {
-    return components.get(s);
-  }
-
-  void addTag(String t) {
-    tags.add(t);
-  }
-
-  boolean hasTag(String s) {
-    for (int i = 0; i < tags.size(); i++) {
-      if (tags.get(i) == s) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void removeComponent(String name) {
-    components.remove(name);
-  }
-
-  void awake() {
-    Component c;
-    for (String key : components.keySet()) {
-      ArrayList<Component> list = components.get(key);
-      for(int i = 0; i < list.size(); i++){
-        list.get(i).awake();  
-      }
-    }
-  }
-
-  void update(float dt) {
-    Component c;
-    ArrayList <Component> list;
-    for (String key : components.keySet()) {
-      list = components.get(key);
-      if(list != null){
-        for(int i = 0; i < list.size(); ++i){
-          if(list.get(i).isEnabled()){
-            list.get(i).update(dt);
-          }
-        }
-      }
-    }
-  }
-
-  boolean haTag(String tag) {
-    for (int i = 0; i < tags.size(); i++) {
-      if (tags.get(i) == tag) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  PVector getPosition() {
-    return position;
-  }
-
-  void setPosition(float x, float y) {
-    position.x = x;
-    position.y = y;
-  }
-
-  void render() {
-    Component c;
-    ArrayList <Component> list;
-    for (String key : components.keySet()) {
-      list = components.get(key);
-      if(list != null){
-        for(int i = 0; i < list.size(); ++i){
-          if(list.get(i).isEnabled()){
-            list.get(i).render();
-          }
-        }
-      }
-    }
-  }
-
-  void slateForRemoval() {
-    requiresRemoval = true;
-  }
-}
-/////////////////////////////
-// SpriteControllerComponent
-/////////////////////////////
-class SpriteControllerComponent extends Component {
-
-  // SpriteController component manages behvaviour of sprites
-
-  boolean isAlive;
-  boolean squashable;
-
-  SpriteControllerComponent() {
-    super();
-    componentName = "SpriteControllerComponent";
-    squashable = true;
-  }
-
-  boolean isFalling() {
-    // do stuff here
-    return false;
-  }
-
-  boolean canBeSquashed() {
-    return squashable;
-  }
-
-  // they can be hurt in different ways..
-  void hurt() {
-  }
-
-  // 
-  void squash() {
-   if(squashable){
-      gameObject.slateForRemoval();
-    }
-  }
-
-  void bump() {
-  }
-
-  void walk() {
-  }
-
-  // If hit by invinsible mario, any sprite is immediately killed
-  void kill() {
-    // play animation
-    // set physics component
-    // remove boundingbox?
-  }
-}
-
-//////////////////////
-// GameObjectFactory
-//////////////////////
-class GameObjectFactory {
-
-  public GameObject create(String id) {
-
-    // PLAYER
-    if (id == "player") {
-      GameObject player = new GameObject();
-      player.name = "player";
-
-      PhysicsComponent physicsComp = new PhysicsComponent();
-      physicsComp.setMaxXSpeed(300);
-      // physicsComp.setVelocity(30, 0);
-
-      AnimationComponent aniComp = new AnimationComponent();
-
-      AnimationClip jumpClip = new AnimationClip();
-      jumpClip.addFrame("chars/mario/jump.png");
-      aniComp.addClip("jump", jumpClip);
-
-      AnimationClip idleClip = new AnimationClip();
-      idleClip.addFrame("chars/mario/idle.png");  
-      aniComp.addClip("idle", idleClip);
-      aniComp.play("idle");
-
-      AnimationClip walkClip = new AnimationClip();
-      walkClip.setFrameTime(0.1);
-      for (int i = 0; i < 3; ++i) {
-        walkClip.addFrame("chars/mario/walk" + i + ".png");
-      }
-      aniComp.addClip("walk", walkClip);
-
-      MarioControllerComponent controller = new MarioControllerComponent();
-      player.addComponent(controller);
-
-      BoundingBoxYComponent yBoundingBox = new BoundingBoxYComponent();
-      yBoundingBox.w = TILE_SIZE - TILE_SIZE/2;
-      yBoundingBox.h = TILE_SIZE;
-      yBoundingBox.setOffsets(8, 0);
-
-      BoundingBoxXComponent xBoundingBox = new BoundingBoxXComponent();
-      xBoundingBox.w = TILE_SIZE;
-      xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
-      xBoundingBox.setOffsets(0, - 8);
-
-      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
-      yBoundingBox.type = CollisionManager.PLAYER;
-
-      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
-      xBoundingBox.type = CollisionManager.PLAYER;
-
-      // 
-      player.addComponent(physicsComp);
-      player.addComponent(aniComp);
-      //player.addComponent(collisionComp);
-      
-      player.addComponent(yBoundingBox);
-      player.addComponent(xBoundingBox);
-      
-      return player;
-    }
-
-    //
-    // COIN
-    //
-    else if (id == "coin") {
-      GameObject coin = new GameObject();
-      coin.name = "coin";
-
-      AnimationClip idleClip = new AnimationClip();
-      for (int i = 0; i < 4; i++) {
-        idleClip.addFrame("props/coin/" + "coin" + i + ".png");
-      }
-      idleClip.setFrameTime(0.25);
-
-      AnimationComponent aniComp = new AnimationComponent();
-      aniComp.addClip("idle", idleClip);
-      aniComp.play("idle");
-
-      BoundingBoxComponent bbComp = new BoundingBoxComponent();
-      bbComp.w = 10;
-      bbComp.h = 20;
-      bbComp.setOffsets(11, -6);
-      bbComp.mask = CollisionManager.PLAYER;
-      bbComp.type = CollisionManager.PICKUP;
-
-      coin.addComponent(aniComp);
-      coin.addComponent(bbComp);
-
-      return coin;
-    }
-
-    //
-    // GROUND
-    //
-    else if (id == "ground") {
-      GameObject ground = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/structure/ground.png";
-      ground.addComponent(c);
-
-      // For now reduce collision checks and use a 'fake' ground
-      /*BoundingBoxComponent boxComp = new BoundingBoxComponent();
-       boxComp.w = TILE_SIZE;
-       boxComp.h = TILE_SIZE;
-       ground.addComponent(boxComp);
-       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
-       boxComp.type = CollisionManager.STRUCTURE;
-       GroundCollisionComponent collisionComp = new GroundCollisionComponent();
-       ground.addComponent(collisionComp);*/
-
-      return ground;
-    }
-
-    //
-    // CLOUD
-    //
-    else if (id == "cloud") {
-      GameObject cloud = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/clouds/cloud1.png";
-      c.extraBuffer = TILE_SIZE * 9;
-      cloud.position.y = height - TILE_SIZE;
-      cloud.addComponent(c);
-      return cloud;
-    }
-
-    //
-    // BRICK
-    //
-    else if ( id == "brick") {
-      GameObject brick = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/structure/bricks.png";
-
-      BrickCollisionComponent collisionComp = new BrickCollisionComponent();
-      brick.addComponent(collisionComp);
-
-      BoundingBoxComponent boxComp = new BoundingBoxComponent();
-      boxComp.w = TILE_SIZE;
-      boxComp.h = TILE_SIZE;
-      boxComp.type = CollisionManager.STRUCTURE;
-      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
-
-      brick.addComponent(boxComp);
-      brick.addComponent(c);
-      return brick;
-    }
-
-    //
-    // GOOMBA
-    //
-    else if (id == "goomba") {
-      GameObject goomba = new GameObject();
-      goomba.addTag("enemy");
-      goomba.name = "goomba";
-
-      AnimationComponent aniComp = new AnimationComponent();
-      goomba.addComponent(aniComp);
-
-      AnimationClip walkClip = new AnimationClip();
-      walkClip.setFrameTime(0.25);
-      walkClip.addFrame("chars/goomba/walk0.png");
-      walkClip.addFrame("chars/goomba/walk1.png");
-      aniComp.addClip("walk", walkClip);
-      aniComp.play("walk");
-
-      AnimationClip squashed = new AnimationClip();
-      squashed.addFrame("chars/goomba/dead.png");
-      aniComp.addClip("squashed", squashed);
-
-      GoombaControllerComponent controlComp = new GoombaControllerComponent();
-      //controlComp.walk();
-      goomba.addComponent(controlComp);
-
-      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
-      //physics.setMaxXSpeed(32);
-      //physics.setVelocity(-32, 0);
-      physics.setGravity(0, -100);
-      goomba.addComponent(physics);
-
-      //SpriteControllerComponent sprite = new SpriteControllerComponent();
-      // set properties....
-      // ....
-      // ....
-      //goomba.addComponent(sprite);
-      
-      /*PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
-       physics.setMaxXSpeed(32);
-       physics.setVelocity(32, 0);
-       goomba.addComponent(physics);*/
-
-      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
-      boxComp.w = TILE_SIZE;
-      boxComp.h = TILE_SIZE;
-      boxComp.type = CollisionManager.ENEMY;
-      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
-      goomba.addComponent(boxComp);
-
-      GoombaCollisionComponent collisionComp = new GoombaCollisionComponent();
-      goomba.addComponent(collisionComp);
-
-      return goomba;
-    }
-
-    //
-    // SPINEY
-    //
-    else if (id == "spiney") {
-      GameObject spiney = new GameObject();
-      spiney.addTag("enemy");
-      spiney.name = "spiney";
-
-      AnimationComponent aniComp = new AnimationComponent();
-      spiney.addComponent(aniComp);
-
-      AnimationClip walkClip = new AnimationClip();
-      walkClip.setFrameTime(0.25);
-      walkClip.addFrame("chars/spiney/walk0.png");
-      walkClip.addFrame("chars/spiney/walk1.png");
-      aniComp.addClip("walk", walkClip);
-      aniComp.play("walk");
-
-      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
-      boxComp.w = TILE_SIZE;
-      boxComp.h = TILE_SIZE;
-      boxComp.type = CollisionManager.ENEMY;
-      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
-      spiney.addComponent(boxComp);
-
-      //SpineyCollisionComponent collisionComp = new SpineyCollisionComponent();
-      //CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
-      //spiney.addComponent(collisionComp);
-
-      SpriteControllerComponent sprite = new SpriteControllerComponent();
-      sprite.squashable = false;
-      spiney.addComponent(sprite);
-
-      // CreatureControllerComponent..
-
-      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
-      //physics.setMaxXSpeed(32);
-      //physics.setVelocity(-32, 0);
-      physics.setGravity(0, -100);
-      spiney.addComponent(physics);
-
-      return spiney;
-    }
-    return null;
-  }
-}
 //////////
 // Scene  
 //////////
@@ -2209,6 +1974,56 @@ class Scene {
       gameObjects.add(brick);
       collisionManager.add(brick);
     }
+  }
+}
+
+/////////////////////////////
+// SpriteControllerComponent
+/////////////////////////////
+class SpriteControllerComponent extends Component {
+
+  // SpriteController component manages behvaviour of sprites
+
+  boolean isAlive;
+  boolean squashable;
+
+  SpriteControllerComponent() {
+    super();
+    componentName = "SpriteControllerComponent";
+    squashable = true;
+  }
+
+  boolean isFalling() {
+    // do stuff here
+    return false;
+  }
+
+  boolean canBeSquashed() {
+    return squashable;
+  }
+
+  // they can be hurt in different ways..
+  void hurt() {
+  }
+
+  // 
+  void squash() {
+   if(squashable){
+      gameObject.slateForRemoval();
+    }
+  }
+
+  void bump() {
+  }
+
+  void walk() {
+  }
+
+  // If hit by invinsible mario, any sprite is immediately killed
+  void kill() {
+    // play animation
+    // set physics component
+    // remove boundingbox?
   }
 }
 

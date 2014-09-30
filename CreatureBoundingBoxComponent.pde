@@ -1,5 +1,5 @@
 /////////////////////////////
-// SpineyCollisionComponent
+// CreatureBoundingBoxComponent
 /////////////////////////////
 class CreatureBoundingBoxComponent extends BoundingBoxComponent {
 
@@ -11,7 +11,6 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
   CreatureBoundingBoxComponent() {
     super();
     componentName = "BoundingBoxComponent";
-        //super();
     _fallsOffLedge = false;
   }
 
@@ -36,14 +35,10 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
 
     if(other.hasTag("mario")) {
       MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-    //  mario.hurt();
-
-      // mario game controller 
-      // if dead,
-      //scene.load();
+      if(mario != null && killsMarioOnSquash){
+        scene.load();
+      }
     }
-
-     // TODO: get collision Type
 
     //
     if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
@@ -62,7 +57,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
   }
 
-    boolean doesFallsOffLedge() {
+  boolean doesFallsOffLedge() {
     return _fallsOffLedge;
   }
 }

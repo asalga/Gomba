@@ -60,10 +60,10 @@ class BoundingBoxComponent extends Component {
   }
 
   void onCollisionEnter(GameObject other) {
-    colliders.put(""+other.id, other);
+    colliders.put("" + other.id, other);
   }
 
   void onCollisionExit(GameObject other) {
-    colliders.remove(""+other.id);
+    colliders.remove("" + other.id);
   }
 }

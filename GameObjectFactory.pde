@@ -101,7 +101,7 @@ class GameObjectFactory {
       c.imgPath = "props/structure/ground.png";
       ground.addComponent(c);
 
-      // For now reduce collision checks and use a 'fake' ground
+      // For now, reduce collision checks and use a 'fake' ground in physics comp.
       /*BoundingBoxComponent boxComp = new BoundingBoxComponent();
        boxComp.w = TILE_SIZE;
        boxComp.h = TILE_SIZE;
@@ -134,9 +134,6 @@ class GameObjectFactory {
       GameObject brick = new GameObject();
       WrapAroundComponent c = new WrapAroundComponent();
       c.imgPath = "props/structure/bricks.png";
-
-      BrickCollisionComponent collisionComp = new BrickCollisionComponent();
-      brick.addComponent(collisionComp);
 
       BoundingBoxComponent boxComp = new BoundingBoxComponent();
       boxComp.w = TILE_SIZE;
@@ -196,11 +193,9 @@ class GameObjectFactory {
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.ENEMY;
+      boxComp.killsMarioOnSquash = false;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
       goomba.addComponent(boxComp);
-
-      GoombaCollisionComponent collisionComp = new GoombaCollisionComponent();
-      goomba.addComponent(collisionComp);
 
       return goomba;
     }
@@ -230,15 +225,9 @@ class GameObjectFactory {
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
       spiney.addComponent(boxComp);
 
-      //SpineyCollisionComponent collisionComp = new SpineyCollisionComponent();
-      //CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
-      //spiney.addComponent(collisionComp);
-
       SpriteControllerComponent sprite = new SpriteControllerComponent();
       sprite.squashable = false;
       spiney.addComponent(sprite);
-
-      // CreatureControllerComponent..
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
       //physics.setMaxXSpeed(32);
