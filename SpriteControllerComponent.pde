@@ -29,6 +29,9 @@ class SpriteControllerComponent extends Component {
 
   // 
   void squash() {
+   if(squashable){
+      gameObject.slateForRemoval();
+    }
   }
 
   void bump() {

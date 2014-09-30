@@ -1,11 +1,6 @@
 import ddf.minim.*;
-
 /*
   @pjs globalKeyEvents="true"; preload="data/atlas_2x.png";
- */
-
-/* 
- - fix jumping audio
  */
 
 final int SCALE = 2;
@@ -106,4 +101,3 @@ void keyPressed() {
     debugOn = !debugOn;
   }
 }
-

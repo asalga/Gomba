@@ -28,7 +28,9 @@ class MarioControllerComponent extends Component {
     super.awake();
     animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
     physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    physics.setHasFriction(true);
+    if(physics != null){
+      physics.setHasFriction(true);
+    }
   }
 
   void update(float dt) {
@@ -88,6 +90,10 @@ class MarioControllerComponent extends Component {
     }
   }
 
+  void jumpOffEnemy(){
+    physics.applyForce(0, jumpForce);
+  }
+
   void render() {
     debug.addString(">>>" + gameObject.position);
   }
@@ -105,6 +111,10 @@ class MarioControllerComponent extends Component {
 
   boolean isJumping() {
     return physics.isTouchingFloor();
+  }
+
+  void hurt(){
+    scene.load();
   }
 
   // player can only jump if they are touching the floor.

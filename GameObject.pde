@@ -2,18 +2,17 @@
 // GameObject
 ///////////////
 class GameObject {
-
   PVector position;
   String name;
   ArrayList<String> tags;
-  HashMap<String, Component> components;
+  HashMap<String, ArrayList<Component> > components;
   boolean requiresRemoval;
   int id;
 
   GameObject() {
     position = new PVector();
     name = "";
-    components = new HashMap<String, Component>();
+    components = new HashMap<String, ArrayList<Component>>();
     tags = new ArrayList<String>();
     requiresRemoval = false;
     id = Utils.getNextID();
@@ -21,10 +20,30 @@ class GameObject {
 
   void addComponent(Component component) {
     component.setGameObject(this);
-    components.put(component.componentName, component);
+
+    ArrayList<Component> list = components.get(component.getComponentName());
+    if(list == null){
+      list = new ArrayList<Component>();
+      list.add(component);
+      components.put(component.getComponentName(), list);
+    }
+    else{
+      list.add(component);
+    }
   }
 
+  /*
+    legacy
+  */
   Component getComponent(String s) {
+    ArrayList<Component> c = components.get(s);
+    if(c != null){
+      return c.get(0);  
+    }
+    return null;
+  }
+
+  ArrayList<Component> getComponentList(String s) {
     return components.get(s);
   }
 
@@ -48,17 +67,24 @@ class GameObject {
   void awake() {
     Component c;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      c.awake();
+      ArrayList<Component> list = components.get(key);
+      for(int i = 0; i < list.size(); i++){
+        list.get(i).awake();  
+      }
     }
   }
 
   void update(float dt) {
     Component c;
+    ArrayList <Component> list;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      if (c.isEnabled()) {
-        c.update(dt);
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).update(dt);
+          }
+        }
       }
     }
   }
@@ -83,10 +109,15 @@ class GameObject {
 
   void render() {
     Component c;
+    ArrayList <Component> list;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      if (c.isEnabled()) {
-        c.render();
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).render();
+          }
+        }
       }
     }
   }
@@ -95,4 +126,3 @@ class GameObject {
     requiresRemoval = true;
   }
 }
-

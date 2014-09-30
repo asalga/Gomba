@@ -13,8 +13,9 @@ minify:
 		AtlasParserJSON.js              \
 		AtlasParserXML.js               \
 		BoundingBoxComponent.pde        \
+		BoundingBoxYComponent.pde       \
+		BoundingBoxXComponent.pde       \
 		CameraComponent.pde             \
-		CoinCollisionComponent.pde      \
 		GroundCollisionComponent.pde    \
 		MarioControllerComponent.pde    \
 		PhysicsComponent.pde            \
@@ -23,13 +24,11 @@ minify:
 		PatrolEnemyPhysicsComponent.pde \
 		Component.pde                  	\
 		Debugger.pde                    \
-		SpineyCollisionComponent.pde    \
-		CreatureCollisionComponent.pde  \
+		CreatureBoundingBoxComponent.pde\
 		Keyboard.pde                    \
 		BrickCollisionComponent.pde     \
 		GoombaCollisionComponent.pde    \
 		GoombaControllerComponent.pde   \
-		MarioCollisionComponent.pde     \
 		GameObject.pde                  \
 		SpriteControllerComponent.pde   \
 		GameObjectFactory.pde           \

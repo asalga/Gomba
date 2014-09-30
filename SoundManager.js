@@ -47,7 +47,6 @@ var SoundManager = (function() {
 
                 this.findFreeChannel = function(){
                 	for(var i = 0; i < this.playedOnce.length; i++){
-                		console.log(this.players[0].ended);
                 		if(this.playedOnce[i] === false ||
                 			this.players[i].ended === true){
                 			return i;

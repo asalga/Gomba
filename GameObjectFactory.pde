@@ -35,20 +35,30 @@ class GameObjectFactory {
       MarioControllerComponent controller = new MarioControllerComponent();
       player.addComponent(controller);
 
-      BoundingBoxComponent bbComp = new BoundingBoxComponent();
-      bbComp.w = TILE_SIZE;
-      bbComp.h = TILE_SIZE;
+      BoundingBoxYComponent yBoundingBox = new BoundingBoxYComponent();
+      yBoundingBox.w = TILE_SIZE - TILE_SIZE/2;
+      yBoundingBox.h = TILE_SIZE;
+      yBoundingBox.setOffsets(8, 0);
 
-      bbComp.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
-      bbComp.type = CollisionManager.PLAYER;
+      BoundingBoxXComponent xBoundingBox = new BoundingBoxXComponent();
+      xBoundingBox.w = TILE_SIZE;
+      xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
+      xBoundingBox.setOffsets(0, - 8);
 
-      MarioCollisionComponent collisionComp = new MarioCollisionComponent();
+      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      yBoundingBox.type = CollisionManager.PLAYER;
 
-      player.addComponent(bbComp);
+      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      xBoundingBox.type = CollisionManager.PLAYER;
+
+      // 
       player.addComponent(physicsComp);
       player.addComponent(aniComp);
-      player.addComponent(collisionComp);
-
+      //player.addComponent(collisionComp);
+      
+      player.addComponent(yBoundingBox);
+      player.addComponent(xBoundingBox);
+      
       return player;
     }
 
@@ -69,8 +79,6 @@ class GameObjectFactory {
       aniComp.addClip("idle", idleClip);
       aniComp.play("idle");
 
-      CoinCollisionComponent collisionComp = new CoinCollisionComponent();
-
       BoundingBoxComponent bbComp = new BoundingBoxComponent();
       bbComp.w = 10;
       bbComp.h = 20;
@@ -79,7 +87,6 @@ class GameObjectFactory {
       bbComp.type = CollisionManager.PICKUP;
 
       coin.addComponent(aniComp);
-      coin.addComponent(collisionComp);
       coin.addComponent(bbComp);
 
       return coin;
@@ -164,19 +171,33 @@ class GameObjectFactory {
       squashed.addFrame("chars/goomba/dead.png");
       aniComp.addClip("squashed", squashed);
 
-      //GoombaControllerComponent controlComp = new GoombaControllerComponent();
+      GoombaControllerComponent controlComp = new GoombaControllerComponent();
       //controlComp.walk();
-      //goomba.addComponent(controlComp);
+      goomba.addComponent(controlComp);
 
-      BoundingBoxComponent boxComp = new BoundingBoxComponent();
-      boxComp.w = TILE_SIZE;
-      boxComp.h = TILE_SIZE;
-      goomba.addComponent(boxComp);
+      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
+      //physics.setMaxXSpeed(32);
+      //physics.setVelocity(-32, 0);
+      physics.setGravity(0, -100);
+      goomba.addComponent(physics);
 
+      //SpriteControllerComponent sprite = new SpriteControllerComponent();
+      // set properties....
+      // ....
+      // ....
+      //goomba.addComponent(sprite);
+      
       /*PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
        physics.setMaxXSpeed(32);
        physics.setVelocity(32, 0);
        goomba.addComponent(physics);*/
+
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.ENEMY;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
+      goomba.addComponent(boxComp);
 
       GoombaCollisionComponent collisionComp = new GoombaCollisionComponent();
       goomba.addComponent(collisionComp);
@@ -202,7 +223,7 @@ class GameObjectFactory {
       aniComp.addClip("walk", walkClip);
       aniComp.play("walk");
 
-      BoundingBoxComponent boxComp = new BoundingBoxComponent();
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.ENEMY;
@@ -210,8 +231,12 @@ class GameObjectFactory {
       spiney.addComponent(boxComp);
 
       //SpineyCollisionComponent collisionComp = new SpineyCollisionComponent();
-      CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
-      spiney.addComponent(collisionComp);
+      //CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
+      //spiney.addComponent(collisionComp);
+
+      SpriteControllerComponent sprite = new SpriteControllerComponent();
+      sprite.squashable = false;
+      spiney.addComponent(sprite);
 
       // CreatureControllerComponent..
 
@@ -223,8 +248,6 @@ class GameObjectFactory {
 
       return spiney;
     }
-
     return null;
   }
 }
-

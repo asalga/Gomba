@@ -40,20 +40,17 @@ class Scene {
     renderTimer = new Timer();
 
     collisionManager.add(player);
-
+    gameObjects.add(player);
     gameObjects.add(gameCamera);
-
 
     generateGroundTiles();
     generateCoins();
     //generateBrickTiles(5);
     //generateBrickTiles(6);
     generateStaircase();
-    //generateGoombas();
+    generateGoombas();
     generateSpineys();
     generateClouds();
-
-    gameObjects.add(player);
 
     awake();
   }
@@ -186,7 +183,7 @@ class Scene {
   void generateGoombas() {
     for (int i = 0; i < 2; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(96 + i * 32, 164 + i * 32);
+      goomba.position = new PVector(96 + i * (TILE_SIZE*10), 164 + i * (TILE_SIZE*10));
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }

@@ -42,13 +42,13 @@ class CollisionManager {
       BoundingBoxComponent bb0 = (BoundingBoxComponent)pair[0].getComponent("BoundingBoxComponent");
       BoundingBoxComponent bb1 = (BoundingBoxComponent)pair[1].getComponent("BoundingBoxComponent");
 
+      if(bb0 == null || bb1 == null){
+        continue;
+      }
+
       if (testCollisionWithTouch(bb0, bb1) == false) {
-        CollisionComponent cc0 = (CollisionComponent)pair[0].getComponent("CollisionComponent");
-        CollisionComponent cc1 = (CollisionComponent)pair[1].getComponent("CollisionComponent");
-
-        cc0.onCollisionExit(pair[1]);
-        cc1.onCollisionExit(pair[0]);
-
+        bb0.onCollisionExit(pair[1]);
+        bb1.onCollisionExit(pair[0]);
         toRemove.add(hashObjectPair(pair[0], pair[1]));
       }
     }
@@ -81,35 +81,50 @@ class CollisionManager {
         GameObject obj1 = gameObjects.get(i);
         GameObject obj2 = gameObjects.get(j);
 
-        BoundingBoxComponent bb1 = (BoundingBoxComponent)obj1.getComponent("BoundingBoxComponent");
-        BoundingBoxComponent bb2 = (BoundingBoxComponent)obj2.getComponent("BoundingBoxComponent");
+        // turn to iterator
+        ArrayList<Component> bbList1 = obj1.getComponentList("BoundingBoxComponent");
+        ArrayList<Component> bbList2 = obj2.getComponentList("BoundingBoxComponent");
 
-        // Check the masks
-        if ((bb1.type & bb2.mask) == 0) {
-          numCollisionTestsSkipped++;
+        if(bbList1 == null || bbList2 == null){
           continue;
         }
 
-        numCollisionTests++;
-        if (testCollisionWithTouch(bb1, bb2)) {
+        for(int bbList1Index = 0; bbList1Index < bbList1.size(); bbList1Index++){
+          BoundingBoxComponent bb1 = (BoundingBoxComponent)bbList1.get(bbList1Index);
+   
+          for(int bbList2Index = 0; bbList2Index < bbList2.size(); bbList2Index++){
+            BoundingBoxComponent bb2 = (BoundingBoxComponent)bbList2.get(bbList2Index);
 
-          CollisionComponent cc1 = (CollisionComponent)obj1.getComponent("CollisionComponent");
-          CollisionComponent cc2 = (CollisionComponent)obj2.getComponent("CollisionComponent");
-
-          String hash = hashObjectPair(obj1, obj2);
-
-          // First time these two are colliding
-          if (collisions.containsKey(hash) == false) {
-            cc1.onCollisionEnter(obj2);
-            cc2.onCollisionEnter(obj1);
-            collisions.put(hash, new GameObject[] { 
-              obj1, obj2
+            if(bb1 == null || bb2 == null){
+              continue;
             }
-            );
-          }
-          else {
-            cc1.onCollision(obj2);
-            cc2.onCollision(obj1);
+
+            // Check the masks
+            if ((bb1.type & bb2.mask) == 0) {
+              numCollisionTestsSkipped++;
+              continue;
+            }
+
+            numCollisionTests++;
+            if (testCollisionWithTouch(bb1, bb2)) {
+
+              String hash = hashObjectPair(obj1, obj2);
+
+              // First time these two are colliding
+              if (collisions.containsKey(hash) == false) {
+                bb1.onCollisionEnter(obj2);
+                bb2.onCollisionEnter(obj1);
+                
+                collisions.put(hash, new GameObject[] { 
+                  obj1, obj2
+                }
+                );
+              }
+              else {
+                bb1.onCollision(obj2);
+                bb2.onCollision(obj1);
+              }
+            }
           }
         }
       }
@@ -129,4 +144,3 @@ class CollisionManager {
     return hash;
   }
 }
-

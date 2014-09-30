@@ -7,6 +7,7 @@ class BoundingBoxComponent extends Component {
   float xOffest, yOffset;
   int mask;
   int type;
+  HashMap<String, GameObject> colliders;
 
   BoundingBoxComponent() {
     super();
@@ -15,6 +16,7 @@ class BoundingBoxComponent extends Component {
     w = h = TILE_SIZE;
     xOffest = yOffset = 0;
     mask = 0;
+    colliders = new HashMap<String, GameObject>();
   }
 
   void awake() {
@@ -45,12 +47,23 @@ class BoundingBoxComponent extends Component {
       strokeWeight(1);
       noFill();
       stroke(255, 0, 0);
-      rect(x + 0, -y + yOffset*2, w, h);
+      rect(x, -y + yOffset*2, w, h);
       popStyle();
     }
   }
 
   String toString() {
     return "(" + x + "," + y + ")  " + "(" + w + "," + h + ")";
+  }
+
+  void onCollision(GameObject other) {
+  }
+
+  void onCollisionEnter(GameObject other) {
+    colliders.put(""+other.id, other);
+  }
+
+  void onCollisionExit(GameObject other) {
+    colliders.remove(""+other.id);
   }
 }

@@ -1,11 +1,6 @@
 import ddf.minim.*;
-
 /*
   @pjs globalKeyEvents="true"; preload="data/atlas_2x.png";
- */
-
-/* 
- - fix jumping audio
  */
 
 final int SCALE = 2;
@@ -106,7 +101,6 @@ void keyPressed() {
     debugOn = !debugOn;
   }
 }
-
 //////////////////
 // AnimationClip
 //////////////////
@@ -344,6 +338,7 @@ class BoundingBoxComponent extends Component {
   float xOffest, yOffset;
   int mask;
   int type;
+  HashMap<String, GameObject> colliders;
 
   BoundingBoxComponent() {
     super();
@@ -352,6 +347,7 @@ class BoundingBoxComponent extends Component {
     w = h = TILE_SIZE;
     xOffest = yOffset = 0;
     mask = 0;
+    colliders = new HashMap<String, GameObject>();
   }
 
   void awake() {
@@ -382,13 +378,101 @@ class BoundingBoxComponent extends Component {
       strokeWeight(1);
       noFill();
       stroke(255, 0, 0);
-      rect(x + 0, -y + yOffset*2, w, h);
+      rect(x, -y + yOffset*2, w, h);
       popStyle();
     }
   }
 
   String toString() {
     return "(" + x + "," + y + ")  " + "(" + w + "," + h + ")";
+  }
+
+  void onCollision(GameObject other) {
+  }
+
+  void onCollisionEnter(GameObject other) {
+    colliders.put(""+other.id, other);
+  }
+
+  void onCollisionExit(GameObject other) {
+    colliders.remove(""+other.id);
+  }
+}
+//////////////////////////
+// BoundingBoxYComponent
+//////////////////////////
+class BoundingBoxYComponent extends BoundingBoxComponent {
+
+  BoundingBoxYComponent() {
+    super();
+    componentName = "BoundingBoxComponent";
+  }
+
+  void onCollision(GameObject other) {
+  }
+
+  void onCollisionExit(GameObject other) {
+  }
+  
+  void onCollisionEnter(GameObject other) {
+
+    if(other.name == "coin"){
+      soundManager.playSound("coin_pickup");
+      other.slateForRemoval();
+    }
+
+    // If the Y bounding box hits an enemy, it either fell on 
+    // the player or the player jumped on it.
+    if (other.hasTag("enemy")) {
+      if(other.position.y < gameObject.position.y){
+
+        // tell the sprite it got squashed
+
+        // we 'bounce' the player off of the enemy
+
+        // 
+        SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
+        //CreatureControllerComponent creature = (CreatureControllerComponent)other.getComponent("CreatureControllerComponent");
+        sprite.squash();
+
+        MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+        mario.jumpOffEnemy();
+      }
+      // enemy fell on the player
+      else{
+        scene.load();
+      }
+
+    }
+  }
+}
+//////////////////////////
+// BoundingBoxXComponent
+//////////////////////////
+class BoundingBoxXComponent extends BoundingBoxComponent {
+
+  BoundingBoxXComponent() {
+    super();
+    componentName = "BoundingBoxComponent";
+  }
+
+  void onCollision(GameObject other) {
+  }
+
+  void onCollisionExit(GameObject other) {
+    super.onCollisionExit(other);
+  }
+  
+  void onCollisionEnter(GameObject other) {
+    super.onCollisionEnter(other);
+    
+    if (other.hasTag("enemy")) {
+      scene.load();
+    }
+    if(other.name == "coin"){
+      soundManager.playSound("coin_pickup");
+      other.slateForRemoval();
+    }
   }
 }
 ////////////////////
@@ -453,29 +537,6 @@ class CameraComponent extends Component {
 
   void follow(GameObject go) {
     gameObjectToFollow = go;
-  }
-}
-
-///////////////////////////
-// CoinCollisionComponent
-///////////////////////////
-class CoinCollisionComponent extends CollisionComponent {
-
-  CoinCollisionComponent() {
-    // TODO: fix
-    componentName = "CollisionComponent";
-  }
-
-  void onCollision(GameObject other) {    
-    if (other.name == "player") {
-      soundManager.playSound("coin_pickup");
-      gameObject.slateForRemoval();
-    }
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-  void onCollisionEnter(GameObject other) {
   }
 }
 
@@ -549,7 +610,9 @@ class MarioControllerComponent extends Component {
     super.awake();
     animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
     physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    physics.setHasFriction(true);
+    if(physics != null){
+      physics.setHasFriction(true);
+    }
   }
 
   void update(float dt) {
@@ -609,6 +672,10 @@ class MarioControllerComponent extends Component {
     }
   }
 
+  void jumpOffEnemy(){
+    physics.applyForce(0, jumpForce);
+  }
+
   void render() {
     debug.addString(">>>" + gameObject.position);
   }
@@ -626,6 +693,10 @@ class MarioControllerComponent extends Component {
 
   boolean isJumping() {
     return physics.isTouchingFloor();
+  }
+
+  void hurt(){
+    scene.load();
   }
 
   // player can only jump if they are touching the floor.
@@ -887,13 +958,13 @@ class CollisionManager {
       BoundingBoxComponent bb0 = (BoundingBoxComponent)pair[0].getComponent("BoundingBoxComponent");
       BoundingBoxComponent bb1 = (BoundingBoxComponent)pair[1].getComponent("BoundingBoxComponent");
 
+      if(bb0 == null || bb1 == null){
+        continue;
+      }
+
       if (testCollisionWithTouch(bb0, bb1) == false) {
-        CollisionComponent cc0 = (CollisionComponent)pair[0].getComponent("CollisionComponent");
-        CollisionComponent cc1 = (CollisionComponent)pair[1].getComponent("CollisionComponent");
-
-        cc0.onCollisionExit(pair[1]);
-        cc1.onCollisionExit(pair[0]);
-
+        bb0.onCollisionExit(pair[1]);
+        bb1.onCollisionExit(pair[0]);
         toRemove.add(hashObjectPair(pair[0], pair[1]));
       }
     }
@@ -926,35 +997,50 @@ class CollisionManager {
         GameObject obj1 = gameObjects.get(i);
         GameObject obj2 = gameObjects.get(j);
 
-        BoundingBoxComponent bb1 = (BoundingBoxComponent)obj1.getComponent("BoundingBoxComponent");
-        BoundingBoxComponent bb2 = (BoundingBoxComponent)obj2.getComponent("BoundingBoxComponent");
+        // turn to iterator
+        ArrayList<Component> bbList1 = obj1.getComponentList("BoundingBoxComponent");
+        ArrayList<Component> bbList2 = obj2.getComponentList("BoundingBoxComponent");
 
-        // Check the masks
-        if ((bb1.type & bb2.mask) == 0) {
-          numCollisionTestsSkipped++;
+        if(bbList1 == null || bbList2 == null){
           continue;
         }
 
-        numCollisionTests++;
-        if (testCollisionWithTouch(bb1, bb2)) {
+        for(int bbList1Index = 0; bbList1Index < bbList1.size(); bbList1Index++){
+          BoundingBoxComponent bb1 = (BoundingBoxComponent)bbList1.get(bbList1Index);
+   
+          for(int bbList2Index = 0; bbList2Index < bbList2.size(); bbList2Index++){
+            BoundingBoxComponent bb2 = (BoundingBoxComponent)bbList2.get(bbList2Index);
 
-          CollisionComponent cc1 = (CollisionComponent)obj1.getComponent("CollisionComponent");
-          CollisionComponent cc2 = (CollisionComponent)obj2.getComponent("CollisionComponent");
-
-          String hash = hashObjectPair(obj1, obj2);
-
-          // First time these two are colliding
-          if (collisions.containsKey(hash) == false) {
-            cc1.onCollisionEnter(obj2);
-            cc2.onCollisionEnter(obj1);
-            collisions.put(hash, new GameObject[] { 
-              obj1, obj2
+            if(bb1 == null || bb2 == null){
+              continue;
             }
-            );
-          }
-          else {
-            cc1.onCollision(obj2);
-            cc2.onCollision(obj1);
+
+            // Check the masks
+            if ((bb1.type & bb2.mask) == 0) {
+              numCollisionTestsSkipped++;
+              continue;
+            }
+
+            numCollisionTests++;
+            if (testCollisionWithTouch(bb1, bb2)) {
+
+              String hash = hashObjectPair(obj1, obj2);
+
+              // First time these two are colliding
+              if (collisions.containsKey(hash) == false) {
+                bb1.onCollisionEnter(obj2);
+                bb2.onCollisionEnter(obj1);
+                
+                collisions.put(hash, new GameObject[] { 
+                  obj1, obj2
+                }
+                );
+              }
+              else {
+                bb1.onCollision(obj2);
+                bb2.onCollision(obj1);
+              }
+            }
           }
         }
       }
@@ -974,7 +1060,6 @@ class CollisionManager {
     return hash;
   }
 }
-
 ////////////////////////////////
 // PatrolEnemyPhysicsComponent
 ////////////////////////////////
@@ -1108,41 +1193,24 @@ class Debugger {
 /////////////////////////////
 // SpineyCollisionComponent
 /////////////////////////////
-class SpineyCollisionComponent extends CollisionComponent {
+class CreatureBoundingBoxComponent extends BoundingBoxComponent {
 
-  SpineyCollisionComponent() {
-    // TODO: fix
-    super();
-    componentName = "CollisionComponent";
-  }
-
-  void onCollision(GameObject other) {
-    // If mario is invinsible
-    // kick spiney
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-  void onCollisionEnter(GameObject other) {
-  }
-}
-
-///////////////////////////////
-// CreatureCollisionComponent
-///////////////////////////////
-class CreatureCollisionComponent extends CollisionComponent {
-
+  // Spiney can't be squashed
+  boolean killsMarioOnSquash = true;
   public boolean _fallsOffLedge;
   PhysicsComponent phy;
 
-  CreatureCollisionComponent() {
+  CreatureBoundingBoxComponent() {
     super();
+    componentName = "BoundingBoxComponent";
+        //super();
     _fallsOffLedge = false;
   }
 
-  void awake() {
-    super.awake();
-    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+  void onCollision(GameObject other) {
+    //If (mario is invinsible){
+    //  kick sprite
+    //}
   }
 
   void onCollisionExit(GameObject other) {
@@ -1158,7 +1226,16 @@ class CreatureCollisionComponent extends CollisionComponent {
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
 
-    // TODO: get collision Type
+    if(other.hasTag("mario")) {
+      MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
+    //  mario.hurt();
+
+      // mario game controller 
+      // if dead,
+      //scene.load();
+    }
+
+     // TODO: get collision Type
 
     //
     if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
@@ -1172,14 +1249,15 @@ class CreatureCollisionComponent extends CollisionComponent {
     // If hit the top of something, land()
   }
 
-  void onCollision(GameObject other) {
+  void awake() {
+    super.awake();
+    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
   }
 
-  boolean doesFallsOffLedge() {
+    boolean doesFallsOffLedge() {
     return _fallsOffLedge;
   }
 }
-
 /////////////
 // Keyboard
 /////////////
@@ -1419,17 +1497,19 @@ class GoombaCollisionComponent extends CollisionComponent {
   }
 }
 
-///////////////////
+//////////////////////////////
 // GoombaControllerComponent
-///////////////////
+//////////////////////////////
 class GoombaControllerComponent extends SpriteControllerComponent {
 
   AnimationComponent animationComponent;
+  Timer deathTimer;
 
   GoombaControllerComponent() {
     // TODO: fix
     super();
-    componentName = "EnemyControllerComponent";
+    componentName = "SpriteControllerComponent";
+    deathTimer = null;
   }
 
   void awake() {
@@ -1439,58 +1519,40 @@ class GoombaControllerComponent extends SpriteControllerComponent {
 
   void squash() {
     animationComponent.play("squashed");
+    deathTimer = new Timer();
     isAlive = false;
     //gameObject.velocity.set(0,0);
     gameObject.removeComponent("PhysicsComponent");
+    gameObject.removeComponent("BoundingBoxComponent");
   }
 
   void update(float dt) {
+    if(deathTimer != null){
+      deathTimer.tick();
+      if(deathTimer.getTotalTime() > 0.5){
+        gameObject.slateForRemoval();
+      }
+    }
   }
 
   void render() {
   }
 }
-
-////////////////////////////
-// MarioCollisionComponent
-////////////////////////////
-class MarioCollisionComponent extends CollisionComponent {
-
-  MarioCollisionComponent() {
-    super();
-    componentName = "CollisionComponent";
-  }
-
-  void onCollision(GameObject other) {
-    // For right now, just reload the scene
-    if (other.hasTag("enemy")) {
-      scene.load();
-    }
-  }
-
-  void onCollisionExit(GameObject other) {
-  }
-  
-  void onCollisionEnter(GameObject other) {
-  }
-}
-
 ///////////////
 // GameObject
 ///////////////
 class GameObject {
-
   PVector position;
   String name;
   ArrayList<String> tags;
-  HashMap<String, Component> components;
+  HashMap<String, ArrayList<Component> > components;
   boolean requiresRemoval;
   int id;
 
   GameObject() {
     position = new PVector();
     name = "";
-    components = new HashMap<String, Component>();
+    components = new HashMap<String, ArrayList<Component>>();
     tags = new ArrayList<String>();
     requiresRemoval = false;
     id = Utils.getNextID();
@@ -1498,10 +1560,30 @@ class GameObject {
 
   void addComponent(Component component) {
     component.setGameObject(this);
-    components.put(component.componentName, component);
+
+    ArrayList<Component> list = components.get(component.getComponentName());
+    if(list == null){
+      list = new ArrayList<Component>();
+      list.add(component);
+      components.put(component.getComponentName(), list);
+    }
+    else{
+      list.add(component);
+    }
   }
 
+  /*
+    legacy
+  */
   Component getComponent(String s) {
+    ArrayList<Component> c = components.get(s);
+    if(c != null){
+      return c.get(0);  
+    }
+    return null;
+  }
+
+  ArrayList<Component> getComponentList(String s) {
     return components.get(s);
   }
 
@@ -1525,17 +1607,24 @@ class GameObject {
   void awake() {
     Component c;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      c.awake();
+      ArrayList<Component> list = components.get(key);
+      for(int i = 0; i < list.size(); i++){
+        list.get(i).awake();  
+      }
     }
   }
 
   void update(float dt) {
     Component c;
+    ArrayList <Component> list;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      if (c.isEnabled()) {
-        c.update(dt);
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).update(dt);
+          }
+        }
       }
     }
   }
@@ -1560,10 +1649,15 @@ class GameObject {
 
   void render() {
     Component c;
+    ArrayList <Component> list;
     for (String key : components.keySet()) {
-      c = components.get(key);
-      if (c.isEnabled()) {
-        c.render();
+      list = components.get(key);
+      if(list != null){
+        for(int i = 0; i < list.size(); ++i){
+          if(list.get(i).isEnabled()){
+            list.get(i).render();
+          }
+        }
       }
     }
   }
@@ -1572,7 +1666,6 @@ class GameObject {
     requiresRemoval = true;
   }
 }
-
 /////////////////////////////
 // SpriteControllerComponent
 /////////////////////////////
@@ -1604,6 +1697,9 @@ class SpriteControllerComponent extends Component {
 
   // 
   void squash() {
+   if(squashable){
+      gameObject.slateForRemoval();
+    }
   }
 
   void bump() {
@@ -1657,20 +1753,30 @@ class GameObjectFactory {
       MarioControllerComponent controller = new MarioControllerComponent();
       player.addComponent(controller);
 
-      BoundingBoxComponent bbComp = new BoundingBoxComponent();
-      bbComp.w = TILE_SIZE;
-      bbComp.h = TILE_SIZE;
+      BoundingBoxYComponent yBoundingBox = new BoundingBoxYComponent();
+      yBoundingBox.w = TILE_SIZE - TILE_SIZE/2;
+      yBoundingBox.h = TILE_SIZE;
+      yBoundingBox.setOffsets(8, 0);
 
-      bbComp.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
-      bbComp.type = CollisionManager.PLAYER;
+      BoundingBoxXComponent xBoundingBox = new BoundingBoxXComponent();
+      xBoundingBox.w = TILE_SIZE;
+      xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
+      xBoundingBox.setOffsets(0, - 8);
 
-      MarioCollisionComponent collisionComp = new MarioCollisionComponent();
+      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      yBoundingBox.type = CollisionManager.PLAYER;
 
-      player.addComponent(bbComp);
+      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      xBoundingBox.type = CollisionManager.PLAYER;
+
+      // 
       player.addComponent(physicsComp);
       player.addComponent(aniComp);
-      player.addComponent(collisionComp);
-
+      //player.addComponent(collisionComp);
+      
+      player.addComponent(yBoundingBox);
+      player.addComponent(xBoundingBox);
+      
       return player;
     }
 
@@ -1691,8 +1797,6 @@ class GameObjectFactory {
       aniComp.addClip("idle", idleClip);
       aniComp.play("idle");
 
-      CoinCollisionComponent collisionComp = new CoinCollisionComponent();
-
       BoundingBoxComponent bbComp = new BoundingBoxComponent();
       bbComp.w = 10;
       bbComp.h = 20;
@@ -1701,7 +1805,6 @@ class GameObjectFactory {
       bbComp.type = CollisionManager.PICKUP;
 
       coin.addComponent(aniComp);
-      coin.addComponent(collisionComp);
       coin.addComponent(bbComp);
 
       return coin;
@@ -1786,19 +1889,33 @@ class GameObjectFactory {
       squashed.addFrame("chars/goomba/dead.png");
       aniComp.addClip("squashed", squashed);
 
-      //GoombaControllerComponent controlComp = new GoombaControllerComponent();
+      GoombaControllerComponent controlComp = new GoombaControllerComponent();
       //controlComp.walk();
-      //goomba.addComponent(controlComp);
+      goomba.addComponent(controlComp);
 
-      BoundingBoxComponent boxComp = new BoundingBoxComponent();
-      boxComp.w = TILE_SIZE;
-      boxComp.h = TILE_SIZE;
-      goomba.addComponent(boxComp);
+      PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
+      //physics.setMaxXSpeed(32);
+      //physics.setVelocity(-32, 0);
+      physics.setGravity(0, -100);
+      goomba.addComponent(physics);
 
+      //SpriteControllerComponent sprite = new SpriteControllerComponent();
+      // set properties....
+      // ....
+      // ....
+      //goomba.addComponent(sprite);
+      
       /*PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
        physics.setMaxXSpeed(32);
        physics.setVelocity(32, 0);
        goomba.addComponent(physics);*/
+
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.ENEMY;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
+      goomba.addComponent(boxComp);
 
       GoombaCollisionComponent collisionComp = new GoombaCollisionComponent();
       goomba.addComponent(collisionComp);
@@ -1824,7 +1941,7 @@ class GameObjectFactory {
       aniComp.addClip("walk", walkClip);
       aniComp.play("walk");
 
-      BoundingBoxComponent boxComp = new BoundingBoxComponent();
+      CreatureBoundingBoxComponent boxComp = new CreatureBoundingBoxComponent();
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.ENEMY;
@@ -1832,8 +1949,12 @@ class GameObjectFactory {
       spiney.addComponent(boxComp);
 
       //SpineyCollisionComponent collisionComp = new SpineyCollisionComponent();
-      CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
-      spiney.addComponent(collisionComp);
+      //CreatureCollisionComponent collisionComp = new CreatureCollisionComponent();
+      //spiney.addComponent(collisionComp);
+
+      SpriteControllerComponent sprite = new SpriteControllerComponent();
+      sprite.squashable = false;
+      spiney.addComponent(sprite);
 
       // CreatureControllerComponent..
 
@@ -1845,11 +1966,9 @@ class GameObjectFactory {
 
       return spiney;
     }
-
     return null;
   }
 }
-
 //////////
 // Scene  
 //////////
@@ -1892,20 +2011,17 @@ class Scene {
     renderTimer = new Timer();
 
     collisionManager.add(player);
-
+    gameObjects.add(player);
     gameObjects.add(gameCamera);
-
 
     generateGroundTiles();
     generateCoins();
     //generateBrickTiles(5);
     //generateBrickTiles(6);
     generateStaircase();
-    //generateGoombas();
+    generateGoombas();
     generateSpineys();
     generateClouds();
-
-    gameObjects.add(player);
 
     awake();
   }
@@ -2038,7 +2154,7 @@ class Scene {
   void generateGoombas() {
     for (int i = 0; i < 2; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(96 + i * 32, 164 + i * 32);
+      goomba.position = new PVector(96 + i * (TILE_SIZE*10), 164 + i * (TILE_SIZE*10));
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }
