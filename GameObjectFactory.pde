@@ -9,6 +9,7 @@ class GameObjectFactory {
     if (id == "player") {
       GameObject player = new GameObject();
       player.name = "player";
+      player.addTag("player");
 
       PhysicsComponent physicsComp = new PhysicsComponent();
       physicsComp.setMaxXSpeed(300);
@@ -168,9 +169,8 @@ class GameObjectFactory {
       squashed.addFrame("chars/goomba/dead.png");
       aniComp.addClip("squashed", squashed);
 
-      GoombaControllerComponent controlComp = new GoombaControllerComponent();
-      //controlComp.walk();
-      goomba.addComponent(controlComp);
+      GoombaControllerComponent controllerComp = new GoombaControllerComponent();
+      goomba.addComponent(controllerComp);
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
       //physics.setMaxXSpeed(32);
@@ -193,7 +193,6 @@ class GameObjectFactory {
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.ENEMY;
-      boxComp.killsMarioOnSquash = false;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
       goomba.addComponent(boxComp);
 
@@ -226,7 +225,8 @@ class GameObjectFactory {
       spiney.addComponent(boxComp);
 
       SpriteControllerComponent sprite = new SpriteControllerComponent();
-      sprite.squashable = false;
+      sprite.setSquashable(false);
+      sprite.setDoesHurtPlayerOnSquash(true);
       spiney.addComponent(sprite);
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();

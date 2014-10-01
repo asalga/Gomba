@@ -21,26 +21,30 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
       other.slateForRemoval();
     }
 
+    SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
+    MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+
     // If the Y bounding box hits an enemy, it either fell on 
     // the player or the player jumped on it.
     if (other.hasTag("enemy")) {
-      if(other.position.y < gameObject.position.y){
 
-        // tell the sprite it got squashed
+      if(mario.isInvinsible()){
+        sprite.kick();
+        return;
+      }
 
-        // we 'bounce' the player off of the enemy
-
-        // 
-        SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
-        //CreatureControllerComponent creature = (CreatureControllerComponent)other.getComponent("CreatureControllerComponent");
-        sprite.squash();
-
-        MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
-        mario.jumpOffEnemy();
+      // Player jumped on enemy
+      if(gameObject.position.y > other.position.y){
+        if(sprite.doesHurtPlayerOnSquash()){
+          mario.hurt();
+        }
+        else{
+          mario.jumpOffEnemy();
+        }
       }
       // enemy fell on the player
       else{
-        scene.load();
+        mario.hurt();
       }
     }
   }

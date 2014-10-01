@@ -26,6 +26,10 @@ var SoundManager = (function() {
 			    this.players.push(this.audio);
 			    this.playedOnce.push(false);
 
+                this.audio.onended = function(){
+                    this.ended = true;
+                };
+
                 this.play = function() {
                 	var freeIndex = this.findFreeChannel();
 
@@ -62,6 +66,10 @@ var SoundManager = (function() {
                 	var newChannel = this.audio.cloneNode(true);
 				    this.playedOnce.push(false);
                 	this.players.push(newChannel);
+                    
+                    newChannel.onended = function(){
+                        this.ended = true;
+                    };
                 };
             }
             return Player;

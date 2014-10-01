@@ -3,8 +3,8 @@
 //////////////////////////
 class MarioControllerComponent extends Component {
 
-  final float walkForce = 20;//550
-  final float jumpForce = 550;//350
+  final float walkForce = 20; //550
+  final float jumpForce = 550; //350
   //BoundingBoxComponent boundingBox;
 
   PhysicsComponent physics;
@@ -15,6 +15,7 @@ class MarioControllerComponent extends Component {
   boolean _isJumping;
   boolean _isIdle;
   boolean isRunning;
+  boolean _isInvinsible;
 
   MarioControllerComponent() {
     super();
@@ -22,6 +23,7 @@ class MarioControllerComponent extends Component {
     _isJumping = false;
     _isIdle = true;
     isRunning = false;
+    _isInvinsible = false;
   }
 
   void awake() {
@@ -36,6 +38,8 @@ class MarioControllerComponent extends Component {
   void update(float dt) {
     // TODO: fix
     super.update(dt);
+
+    _isInvinsible = Keyboard.isKeyDown(KEY_I);
 
     // We don't want the player to be able to walk after
     // just jumping after being idle. Looks odd.
@@ -113,8 +117,17 @@ class MarioControllerComponent extends Component {
     return physics.isTouchingFloor();
   }
 
+  boolean isInvinsible(){
+    return _isInvinsible;
+  }
+
   void hurt(){
-    scene.load();
+    if(_isInvinsible){
+
+    }
+    else{
+      scene.load();
+    }
   }
 
   // player can only jump if they are touching the floor.
@@ -123,4 +136,3 @@ class MarioControllerComponent extends Component {
     return physics.isTouchingFloor();
   }
 }
-

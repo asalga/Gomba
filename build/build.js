@@ -51,7 +51,8 @@ void setup() {
 
   Keyboard.lockKeys(new int[] {
     KEY_P, 
-    KEY_M
+    KEY_M,
+    KEY_I
   }
   );
 }
@@ -378,9 +379,18 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
   
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
-    
+  
     if (other.hasTag("enemy")) {
-      scene.load();
+      MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+      SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
+
+      // TODO: fix
+      if(mario.isInvinsible()){
+        sprite.kick();
+        return;
+      }
+
+      mario.hurt();
     }
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
@@ -411,26 +421,30 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
       other.slateForRemoval();
     }
 
+    SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
+    MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+
     // If the Y bounding box hits an enemy, it either fell on 
     // the player or the player jumped on it.
     if (other.hasTag("enemy")) {
-      if(other.position.y < gameObject.position.y){
 
-        // tell the sprite it got squashed
+      if(mario.isInvinsible()){
+        sprite.kick();
+        return;
+      }
 
-        // we 'bounce' the player off of the enemy
-
-        // 
-        SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
-        //CreatureControllerComponent creature = (CreatureControllerComponent)other.getComponent("CreatureControllerComponent");
-        sprite.squash();
-
-        MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
-        mario.jumpOffEnemy();
+      // Player jumped on enemy
+      if(gameObject.position.y > other.position.y){
+        if(sprite.doesHurtPlayerOnSquash()){
+          mario.hurt();
+        }
+        else{
+          mario.jumpOffEnemy();
+        }
       }
       // enemy fell on the player
       else{
-        scene.load();
+        mario.hurt();
       }
     }
   }
@@ -702,8 +716,6 @@ class Component {
 /////////////////////////////
 class CreatureBoundingBoxComponent extends BoundingBoxComponent {
 
-  // Spiney can't be squashed
-  boolean killsMarioOnSquash = true;
   public boolean _fallsOffLedge;
   PhysicsComponent phy;
 
@@ -713,10 +725,12 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     _fallsOffLedge = false;
   }
 
+  void awake() {
+    super.awake();
+    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+  }
+
   void onCollision(GameObject other) {
-    //If (mario is invinsible){
-    //  kick sprite
-    //}
   }
 
   void onCollisionExit(GameObject other) {
@@ -732,10 +746,12 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
 
-    if(other.hasTag("mario")) {
+    if(other.hasTag("player")) {
+      SpriteControllerComponent sprite = (SpriteControllerComponent)gameObject.getComponent("SpriteControllerComponent");
       MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-      if(mario != null && killsMarioOnSquash){
-        scene.load();
+
+      if(sprite != null && sprite.canBeSquashed()){
+        sprite.squash();
       }
     }
 
@@ -746,15 +762,9 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     }
 
     // If hit side of something, reversedirection
-    // gameObject.slateForRemoval();
-
     // If hit the top of something, land()
   }
 
-  void awake() {
-    super.awake();
-    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-  }
 
   boolean doesFallsOffLedge() {
     return _fallsOffLedge;
@@ -951,6 +961,7 @@ class GameObjectFactory {
     if (id == "player") {
       GameObject player = new GameObject();
       player.name = "player";
+      player.addTag("player");
 
       PhysicsComponent physicsComp = new PhysicsComponent();
       physicsComp.setMaxXSpeed(300);
@@ -1110,9 +1121,8 @@ class GameObjectFactory {
       squashed.addFrame("chars/goomba/dead.png");
       aniComp.addClip("squashed", squashed);
 
-      GoombaControllerComponent controlComp = new GoombaControllerComponent();
-      //controlComp.walk();
-      goomba.addComponent(controlComp);
+      GoombaControllerComponent controllerComp = new GoombaControllerComponent();
+      goomba.addComponent(controllerComp);
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
       //physics.setMaxXSpeed(32);
@@ -1135,7 +1145,6 @@ class GameObjectFactory {
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.ENEMY;
-      boxComp.killsMarioOnSquash = false;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY | CollisionManager.STRUCTURE;
       goomba.addComponent(boxComp);
 
@@ -1168,7 +1177,8 @@ class GameObjectFactory {
       spiney.addComponent(boxComp);
 
       SpriteControllerComponent sprite = new SpriteControllerComponent();
-      sprite.squashable = false;
+      sprite.setSquashable(false);
+      sprite.setDoesHurtPlayerOnSquash(true);
       spiney.addComponent(sprite);
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
@@ -1403,8 +1413,8 @@ final int KEY_F12 = 122;
 //////////////////////////
 class MarioControllerComponent extends Component {
 
-  final float walkForce = 20;//550
-  final float jumpForce = 550;//350
+  final float walkForce = 20; //550
+  final float jumpForce = 550; //350
   //BoundingBoxComponent boundingBox;
 
   PhysicsComponent physics;
@@ -1415,6 +1425,7 @@ class MarioControllerComponent extends Component {
   boolean _isJumping;
   boolean _isIdle;
   boolean isRunning;
+  boolean _isInvinsible;
 
   MarioControllerComponent() {
     super();
@@ -1422,6 +1433,7 @@ class MarioControllerComponent extends Component {
     _isJumping = false;
     _isIdle = true;
     isRunning = false;
+    _isInvinsible = false;
   }
 
   void awake() {
@@ -1436,6 +1448,8 @@ class MarioControllerComponent extends Component {
   void update(float dt) {
     // TODO: fix
     super.update(dt);
+
+    _isInvinsible = Keyboard.isKeyDown(KEY_I);
 
     // We don't want the player to be able to walk after
     // just jumping after being idle. Looks odd.
@@ -1513,8 +1527,17 @@ class MarioControllerComponent extends Component {
     return physics.isTouchingFloor();
   }
 
+  boolean isInvinsible(){
+    return _isInvinsible;
+  }
+
   void hurt(){
-    scene.load();
+    if(_isInvinsible){
+
+    }
+    else{
+      scene.load();
+    }
   }
 
   // player can only jump if they are touching the floor.
@@ -1523,7 +1546,6 @@ class MarioControllerComponent extends Component {
     return physics.isTouchingFloor();
   }
 }
-
 ////////////////////////////////
 // PatrolEnemyPhysicsComponent
 ////////////////////////////////
@@ -1986,11 +2008,13 @@ class SpriteControllerComponent extends Component {
 
   boolean isAlive;
   boolean squashable;
+  boolean _doesHurtPlayerOnSquash;
 
   SpriteControllerComponent() {
     super();
     componentName = "SpriteControllerComponent";
     squashable = true;
+    _doesHurtPlayerOnSquash = false;
   }
 
   boolean isFalling() {
@@ -2017,6 +2041,22 @@ class SpriteControllerComponent extends Component {
   }
 
   void walk() {
+  }
+
+  void kick(){
+    gameObject.slateForRemoval();
+  }
+
+  boolean doesHurtPlayerOnSquash(){
+    return _doesHurtPlayerOnSquash;
+  }
+
+  void setDoesHurtPlayerOnSquash(boolean b){
+    _doesHurtPlayerOnSquash = b;
+  }
+
+  void setSquashable(boolean b){
+    squashable = b;
   }
 
   // If hit by invinsible mario, any sprite is immediately killed

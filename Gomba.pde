@@ -51,7 +51,8 @@ void setup() {
 
   Keyboard.lockKeys(new int[] {
     KEY_P, 
-    KEY_M
+    KEY_M,
+    KEY_I
   }
   );
 }

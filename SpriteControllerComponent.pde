@@ -7,11 +7,13 @@ class SpriteControllerComponent extends Component {
 
   boolean isAlive;
   boolean squashable;
+  boolean _doesHurtPlayerOnSquash;
 
   SpriteControllerComponent() {
     super();
     componentName = "SpriteControllerComponent";
     squashable = true;
+    _doesHurtPlayerOnSquash = false;
   }
 
   boolean isFalling() {
@@ -38,6 +40,22 @@ class SpriteControllerComponent extends Component {
   }
 
   void walk() {
+  }
+
+  void kick(){
+    gameObject.slateForRemoval();
+  }
+
+  boolean doesHurtPlayerOnSquash(){
+    return _doesHurtPlayerOnSquash;
+  }
+
+  void setDoesHurtPlayerOnSquash(boolean b){
+    _doesHurtPlayerOnSquash = b;
+  }
+
+  void setSquashable(boolean b){
+    squashable = b;
   }
 
   // If hit by invinsible mario, any sprite is immediately killed

@@ -17,9 +17,18 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
   
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
-    
+  
     if (other.hasTag("enemy")) {
-      scene.load();
+      MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+      SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
+
+      // TODO: fix
+      if(mario.isInvinsible()){
+        sprite.kick();
+        return;
+      }
+
+      mario.hurt();
     }
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");

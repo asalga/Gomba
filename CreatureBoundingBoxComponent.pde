@@ -3,8 +3,6 @@
 /////////////////////////////
 class CreatureBoundingBoxComponent extends BoundingBoxComponent {
 
-  // Spiney can't be squashed
-  boolean killsMarioOnSquash = true;
   public boolean _fallsOffLedge;
   PhysicsComponent phy;
 
@@ -14,10 +12,12 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     _fallsOffLedge = false;
   }
 
+  void awake() {
+    super.awake();
+    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+  }
+
   void onCollision(GameObject other) {
-    //If (mario is invinsible){
-    //  kick sprite
-    //}
   }
 
   void onCollisionExit(GameObject other) {
@@ -33,10 +33,12 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
 
-    if(other.hasTag("mario")) {
+    if(other.hasTag("player")) {
+      SpriteControllerComponent sprite = (SpriteControllerComponent)gameObject.getComponent("SpriteControllerComponent");
       MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-      if(mario != null && killsMarioOnSquash){
-        scene.load();
+
+      if(sprite != null && sprite.canBeSquashed()){
+        sprite.squash();
       }
     }
 
@@ -47,15 +49,9 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     }
 
     // If hit side of something, reversedirection
-    // gameObject.slateForRemoval();
-
     // If hit the top of something, land()
   }
 
-  void awake() {
-    super.awake();
-    phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-  }
 
   boolean doesFallsOffLedge() {
     return _fallsOffLedge;
