@@ -153,7 +153,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/coinbox/coinbox1.png",
+	"filename": "props/coinbox/idle1.png",
 	"frame": {"x":132,"y":131,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -161,7 +161,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/mushrooms/murshroom_red.png",
+	"filename": "props/coinbox/idle2.png",
 	"frame": {"x":165,"y":131,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -169,7 +169,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/mushrooms/mushroom_green.png",
+	"filename": "props/coinbox/idle3.png",
 	"frame": {"x":198,"y":131,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -177,7 +177,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/structure/bricks.png",
+	"filename": "props/mushrooms/murshroom_red.png",
 	"frame": {"x":0,"y":164,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -185,7 +185,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/structure/ground.png",
+	"filename": "props/mushrooms/mushroom_green.png",
 	"frame": {"x":33,"y":164,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -193,8 +193,40 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
+	"filename": "props/pipe/pipe_shaft.png",
+	"frame": {"x":66,"y":164,"w":64,"h":8},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":8},
+	"sourceSize": {"w":64,"h":8}
+},
+{
+	"filename": "props/pipe/pipe_top.png",
+	"frame": {"x":131,"y":164,"w":64,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
+	"sourceSize": {"w":64,"h":32}
+},
+{
+	"filename": "props/structure/bricks.png",
+	"frame": {"x":196,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "props/structure/ground.png",
+	"frame": {"x":0,"y":197,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
 	"filename": "props/structure/tile.png",
-	"frame": {"x":66,"y":164,"w":32,"h":32},
+	"frame": {"x":33,"y":197,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -207,6 +239,6 @@
 	"format": "RGBA8888",
 	"size": {"w":256,"h":256},
 	"scale": "2",
-	"smartupdate": "$TexturePacker:SmartUpdate:5a9a76bd64b6e3e45409a9770f7f45d6$"
+	"smartupdate": "$TexturePacker:SmartUpdate:ff75329f9fa262b5804e011d54fbf0a2$"
 }
 }

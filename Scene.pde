@@ -43,15 +43,18 @@ class Scene {
     gameObjects.add(player);
     gameObjects.add(gameCamera);
 
+    // TODO fix: hack to render goomba behind mario
+    // after squash.
     generateGroundTiles();
+    
     generateCoins();
     //generateBrickTiles(5);
     //generateBrickTiles(6);
     generateStaircase();
     generateGoombas();
+    
     generateSpineys();
     generateClouds();
-
     awake();
   }
 
@@ -83,6 +86,7 @@ class Scene {
     if (isPaused) {
       return;
     }
+
     soundManager.playSound("pause");
     timer.pause();
     isPaused = true;
@@ -115,10 +119,9 @@ class Scene {
 
   void render() {
     background(96, 160, 255);
-    //background(0, 0, 0);
 
-    debug.addString("(" + width + "," + height + ")");
-    debug.addString("" + int(frameRate));
+    debug.addString("Dimensions: [" + width + "," + height + "]");
+    debug.addString("FPS: " + int(frameRate));
     debug.addString("collision check time: " + collisionCheckTime);
 
     renderTimer.reset();
@@ -138,7 +141,7 @@ class Scene {
     camComp.postRender();
     renderTimer.tick();
 
-    debug.addString("render time: " + renderTimer.getTotalTime());
+    debug.addString("Render time: " + renderTimer.getTotalTime());
 
     // Find any objects that need to be removed from the scene
     for (int i = gameObjects.size()-1; i >= 0; i--) {
@@ -228,6 +231,13 @@ class Scene {
         collisionManager.add(brick);
       }
     }
+
+    for(int i = 0; i < 10; i++){
+      GameObject brick1 = gameObjectFactory.create("brick");
+      brick1.setPosition(i *TILE_SIZE, TILE_SIZE * 4);
+      gameObjects.add(brick1);
+      collisionManager.add(brick1);
+    }      
   }
 
   void generateBrickTiles(int y) {
@@ -240,4 +250,3 @@ class Scene {
     }
   }
 }
-

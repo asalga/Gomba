@@ -46,10 +46,14 @@ class GameObjectFactory {
       xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
       xBoundingBox.setOffsets(0, - 8);
 
-      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      yBoundingBox.mask = CollisionManager.PICKUP | 
+                          CollisionManager.STRUCTURE |
+                          CollisionManager.ENEMY;
       yBoundingBox.type = CollisionManager.PLAYER;
 
-      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      xBoundingBox.mask = CollisionManager.PICKUP |
+                          CollisionManager.STRUCTURE |
+                          CollisionManager.ENEMY;
       xBoundingBox.type = CollisionManager.PLAYER;
 
       // 
@@ -133,17 +137,22 @@ class GameObjectFactory {
     //
     else if ( id == "brick") {
       GameObject brick = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/structure/bricks.png";
+      brick.addTag("structure");
+
+      WrapAroundComponent wrapAround = new WrapAroundComponent();
+      wrapAround.imgPath = "props/structure/bricks.png";
+      brick.addComponent(wrapAround);
 
       BoundingBoxComponent boxComp = new BoundingBoxComponent();
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.STRUCTURE;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
-
       brick.addComponent(boxComp);
-      brick.addComponent(c);
+
+      BrickControllerComponent controller = new BrickControllerComponent();
+      brick.addComponent(controller);
+
       return brick;
     }
 
@@ -197,6 +206,35 @@ class GameObjectFactory {
       goomba.addComponent(boxComp);
 
       return goomba;
+    }
+
+    else if(id == "coinbox"){
+      GameObject coinBox = new GameObject();
+      coinBox.addTag("coinbox");
+
+      AnimationComponent aniComp = new AnimationComponent();
+      coinBox.addComponent(aniComp);
+
+      AnimationClip dead = new AnimationClip();
+      dead.addFrame("props/coinbox/dead.png");
+
+      AnimationClip idle = new AnimationClip();
+      idle.addFrame("props/coinbox/idle1.png");
+      idle.addFrame("props/coinbox/idle2.png");
+      idle.addFrame("props/coinbox/idle3.png");
+
+      /*CoinBoxBoundingBoxComponent boxComp = new CoinBoxBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+      boxComp.type = CollisionManager.STRUCTURE;
+      boxComp.addComponent(boxComp);
+
+      CoinBoxControllerComponent controller = new CoinBoxControllerComponent();
+      controller.setNumCoins(10);*/
+      // Add list?
+
+      return coinBox;
     }
 
     //

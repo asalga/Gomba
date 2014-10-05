@@ -29,9 +29,17 @@ class SpriteControllerComponent extends Component {
   void hurt() {
   }
 
+  void update(float dt){
+    // TODO: fix
+    if(gameObject.position.y < -500){
+      gameObject.slateForRemoval();
+    }
+  }
+
   // 
   void squash() {
    if(squashable){
+
       gameObject.slateForRemoval();
     }
   }
@@ -65,4 +73,3 @@ class SpriteControllerComponent extends Component {
     // remove boundingbox?
   }
 }
-

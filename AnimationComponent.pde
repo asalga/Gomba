@@ -6,12 +6,14 @@ class AnimationComponent extends Component {
   HashMap<String, AnimationClip> clips;
   AnimationClip currentClip;
   protected boolean flipX;
+  protected boolean flipY;
 
   AnimationComponent() {
     componentName = "AnimationComponent";
     clips = new HashMap<String, AnimationClip>();
     currentClip = null;
     flipX = false;
+    flipY = false;
   }
 
   void addClip(String clipName, AnimationClip clip) {
@@ -35,6 +37,11 @@ class AnimationComponent extends Component {
         scale(-1, 1);
       }
 
+      if(flipY){
+        translate(0, TILE_SIZE);
+        scale(1, -1);
+      }
+
       image(currentClip.getCurrFrame(), 0, 0);
       popMatrix();
     }
@@ -46,6 +53,10 @@ class AnimationComponent extends Component {
 
   void setFlipX(boolean b) {
     flipX = b;
+  }
+
+  void setFlipY(boolean b){
+    flipY = b;
   }
 }
 

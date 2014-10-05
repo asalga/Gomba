@@ -5,7 +5,7 @@ class PatrolEnemyPhysicsComponent extends PhysicsComponent {
 
   PatrolEnemyPhysicsComponent() {
     super();
-    //componentName = "PatrolEnemyPhysicsComponent";		
+    componentName = "PhysicsComponent";
 
     setVelocity(-32, 0);
     setMaxXSpeed(32);

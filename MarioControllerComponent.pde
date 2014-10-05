@@ -130,6 +130,18 @@ class MarioControllerComponent extends Component {
     }
   }
 
+  void hitStructureY(GameObject structure){
+    // landed on top
+    if(gameObject.position.y > structure.position.y){
+      println("FIX hitStructureY()");
+    }
+    else{
+      physics.setVelocityY(0);
+      StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
+      controller.hit(gameObject);
+    }
+  }
+
   // player can only jump if they are touching the floor.
   // TODO: later add if touching platform
   boolean canJump() {

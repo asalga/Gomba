@@ -12,6 +12,7 @@ minify:
 		AtlasParserJSON.js              \
 		AtlasParserXML.js               \
 		BoundingBoxComponent.pde        \
+		BrickControllerComponent.pde	\
 		BoundingBoxXComponent.pde       \
 		BoundingBoxYComponent.pde       \
 		CameraComponent.pde             \
@@ -28,6 +29,7 @@ minify:
 		PhysicsComponent.pde            \
 		Scene.pde                       \
 		SpriteControllerComponent.pde   \
+		StructureControllerComponent.pde\
 		Timer.pde                       \
 		Utils.js                        \
 		WrapAroundComponent.pde	> build/build.js

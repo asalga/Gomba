@@ -60,10 +60,10 @@ class GameObject {
     return false;
   }
 
-  void removeComponent(String name) {
-    components.remove(name);
+  void removeComponent(String key) {
+    components.remove(key);
   }
-
+  
   void awake() {
     Component c;
     for (String key : components.keySet()) {

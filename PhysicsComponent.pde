@@ -31,6 +31,7 @@ class PhysicsComponent extends Component {
     velocity = new PVector();
     acceleration = new PVector();
     drag = new PVector();
+
     gravity = new PVector(0, -1800);
 
     maxXSpeed = 1;
@@ -45,7 +46,7 @@ class PhysicsComponent extends Component {
 
   void awake() {
     super.awake();
-    // fix cast
+    // TODO: fix cast
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
 
     if (boundingBox == null) {
@@ -59,12 +60,6 @@ class PhysicsComponent extends Component {
 
   void setTouhcingFloor(boolean b) {
     _isTouchingFloor = b;
-    if (b) {
-      gravity.y = 0;
-    }
-    else {
-      gravity.y = -100;
-    }
   }
 
   void setGravity(float x, float y) {
@@ -112,21 +107,32 @@ class PhysicsComponent extends Component {
 
     // If we went past the floor after jumping
     // place us at the floor level
-    if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
-      position.y = groundY + boundingBox.h;
-      _isTouchingFloor = true;
-      velocity.y = 0;
-      //velocity.set(0, 0);
+    // TODO: fix
+    boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    if(boundingBox != null){
+      if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
+        position.y = groundY + boundingBox.h;
+        _isTouchingFloor = true;
+        velocity.y = 0;
+        //velocity.set(0, 0);
+      }
+      else if (isTouchingFloor()) {
+        position.y = groundY + boundingBox.h;
+      }
     }
-    else if (isTouchingFloor()) {
-      position.y = groundY + boundingBox.h;
-    }
-
     gameObject.position.set(position.x, position.y);
   }
 
   void setGroundY(float y) {
     groundY = y;
+  }
+
+  void setVelocityY(float y){
+    velocity.y = y;
+  }
+
+  void setVelocityX(float x){
+    velocity.x = x;
   }
 
   void render() {
@@ -169,6 +175,11 @@ class PhysicsComponent extends Component {
   void setVelocity(float x, float y) {
     velocity.x = x;
     velocity.y = y;
+  }
+
+  void stop(){
+    velocity.set(0,0);
+    acceleration.set(0,0);
   }
 
   boolean isAtRest() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
-<!-- $TexturePacker:SmartUpdate:e89ec025930d993f415d6a7d66fb21ec$ -->
+<!-- $TexturePacker:SmartUpdate:64faed4325aec479f0037f8ad909f1c1$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -33,10 +33,14 @@ r => 'y' only set if sprite is rotated
     <sprite n="props/coin/coin1.png" x="33" y="131" w="32" h="32"/>
     <sprite n="props/coin/coin2.png" x="66" y="131" w="32" h="32"/>
     <sprite n="props/coin/coin3.png" x="99" y="131" w="32" h="32"/>
-    <sprite n="props/coinbox/coinbox1.png" x="132" y="131" w="32" h="32"/>
-    <sprite n="props/mushrooms/murshroom_red.png" x="165" y="131" w="32" h="32"/>
-    <sprite n="props/mushrooms/mushroom_green.png" x="198" y="131" w="32" h="32"/>
-    <sprite n="props/structure/bricks.png" x="0" y="164" w="32" h="32"/>
-    <sprite n="props/structure/ground.png" x="33" y="164" w="32" h="32"/>
-    <sprite n="props/structure/tile.png" x="66" y="164" w="32" h="32"/>
+    <sprite n="props/coinbox/idle1.png" x="132" y="131" w="32" h="32"/>
+    <sprite n="props/coinbox/idle2.png" x="165" y="131" w="32" h="32"/>
+    <sprite n="props/coinbox/idle3.png" x="198" y="131" w="32" h="32"/>
+    <sprite n="props/mushrooms/murshroom_red.png" x="0" y="164" w="32" h="32"/>
+    <sprite n="props/mushrooms/mushroom_green.png" x="33" y="164" w="32" h="32"/>
+    <sprite n="props/pipe/pipe_shaft.png" x="66" y="164" w="64" h="8"/>
+    <sprite n="props/pipe/pipe_top.png" x="131" y="164" w="64" h="32"/>
+    <sprite n="props/structure/bricks.png" x="196" y="164" w="32" h="32"/>
+    <sprite n="props/structure/ground.png" x="0" y="197" w="32" h="32"/>
+    <sprite n="props/structure/tile.png" x="33" y="197" w="32" h="32"/>
 </TextureAtlas>

@@ -18,6 +18,7 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
   
+    // ENEMY
     if (other.hasTag("enemy")) {
       MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
       SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
@@ -30,9 +31,19 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
 
       mario.hurt();
     }
+    
+    // COIN
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
       other.slateForRemoval();
+    }
+
+    // STRUCTURE
+    else if(other.hasTag("structure")){
+      // BoundingBoxX -> controller.hitStructureSide(gameObject)
+      // Controller ->  tell physics to stop moving x
+      //                tell animation to stop?
+      //                don't need to tell structure to do anything....
     }
   }
 }

@@ -156,12 +156,14 @@ class AnimationComponent extends Component {
   HashMap<String, AnimationClip> clips;
   AnimationClip currentClip;
   protected boolean flipX;
+  protected boolean flipY;
 
   AnimationComponent() {
     componentName = "AnimationComponent";
     clips = new HashMap<String, AnimationClip>();
     currentClip = null;
     flipX = false;
+    flipY = false;
   }
 
   void addClip(String clipName, AnimationClip clip) {
@@ -185,6 +187,11 @@ class AnimationComponent extends Component {
         scale(-1, 1);
       }
 
+      if(flipY){
+        translate(0, TILE_SIZE);
+        scale(1, -1);
+      }
+
       image(currentClip.getCurrFrame(), 0, 0);
       popMatrix();
     }
@@ -196,6 +203,10 @@ class AnimationComponent extends Component {
 
   void setFlipX(boolean b) {
     flipX = b;
+  }
+
+  void setFlipY(boolean b){
+    flipY = b;
   }
 }
 
@@ -360,6 +371,60 @@ class BoundingBoxComponent extends Component {
     colliders.remove("" + other.id);
   }
 }
+/////////////////////////////
+// BrickControllerComponent
+/////////////////////////////
+class BrickControllerComponent extends StructureControllerComponent{
+	
+	float y;
+	boolean bouncing;
+	float original;
+	BoundingBoxComponent bounds;
+
+	BrickControllerComponent(){
+		super();
+		y = 0;
+		bouncing = false;
+	}
+
+	void awake(){
+		super.awake();
+		bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+	}
+
+	void hit(GameObject other){
+		if(bouncing){
+			return;
+		}
+
+		bouncing = true;
+		original = gameObject.position.y;
+		
+		// TODO: tell any sprites walking on this structure to get kicked()
+		for(int i = 0; i < bounds.colliders.size(); i++ ){
+	      	for(String key: bounds.colliders.keySet()){
+	      		GameObject go = bounds.colliders.get(key);
+	      		SpriteControllerComponent sprite = (SpriteControllerComponent)go.getComponent("SpriteControllerComponent");
+	      		if(sprite != null){
+	      			sprite.kick();
+	      		}
+	      	}
+	    }
+	}
+
+	void update(float dt){
+		if(bouncing == true){
+			y += dt * 15.0;
+			gameObject.position.y = original + 15 * sin(y);
+		}
+		if(y >= PI){
+			y = 0;
+			bouncing = false;
+			gameObject.position.y = original;
+		}
+	}
+}
+
 //////////////////////////
 // BoundingBoxXComponent
 //////////////////////////
@@ -380,6 +445,7 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
   
+    // ENEMY
     if (other.hasTag("enemy")) {
       MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
       SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
@@ -392,9 +458,19 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
 
       mario.hurt();
     }
+    
+    // COIN
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
       other.slateForRemoval();
+    }
+
+    // STRUCTURE
+    else if(other.hasTag("structure")){
+      // BoundingBoxX -> controller.hitStructureSide(gameObject)
+      // Controller ->  tell physics to stop moving x
+      //                tell animation to stop?
+      //                don't need to tell structure to do anything....
     }
   }
 }
@@ -409,24 +485,27 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
   }
 
   void onCollision(GameObject other) {
+    super.onCollision(other);
   }
 
   void onCollisionExit(GameObject other) {
+    super.onCollisionExit(other);
   }
   
   void onCollisionEnter(GameObject other) {
+    super.onCollisionEnter(other);
 
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
       other.slateForRemoval();
     }
 
-    SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
     MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
 
     // If the Y bounding box hits an enemy, it either fell on 
     // the player or the player jumped on it.
     if (other.hasTag("enemy")) {
+      SpriteControllerComponent sprite = (SpriteControllerComponent)other.getComponent("SpriteControllerComponent");
 
       if(mario.isInvinsible()){
         sprite.kick();
@@ -447,7 +526,12 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
         mario.hurt();
       }
     }
-  }
+
+    // STRUCTURE
+    else if(other.hasTag("structure")){
+      mario.hitStructureY(other);
+    }
+  } 
 }
 ////////////////////
 // CameraComponent
@@ -884,10 +968,10 @@ class GameObject {
     return false;
   }
 
-  void removeComponent(String name) {
-    components.remove(name);
+  void removeComponent(String key) {
+    components.remove(key);
   }
-
+  
   void awake() {
     Component c;
     for (String key : components.keySet()) {
@@ -998,10 +1082,14 @@ class GameObjectFactory {
       xBoundingBox.h = TILE_SIZE - TILE_SIZE/2;
       xBoundingBox.setOffsets(0, - 8);
 
-      yBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      yBoundingBox.mask = CollisionManager.PICKUP | 
+                          CollisionManager.STRUCTURE |
+                          CollisionManager.ENEMY;
       yBoundingBox.type = CollisionManager.PLAYER;
 
-      xBoundingBox.mask = CollisionManager.PICKUP | CollisionManager.STRUCTURE;
+      xBoundingBox.mask = CollisionManager.PICKUP |
+                          CollisionManager.STRUCTURE |
+                          CollisionManager.ENEMY;
       xBoundingBox.type = CollisionManager.PLAYER;
 
       // 
@@ -1085,17 +1173,22 @@ class GameObjectFactory {
     //
     else if ( id == "brick") {
       GameObject brick = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/structure/bricks.png";
+      brick.addTag("structure");
+
+      WrapAroundComponent wrapAround = new WrapAroundComponent();
+      wrapAround.imgPath = "props/structure/bricks.png";
+      brick.addComponent(wrapAround);
 
       BoundingBoxComponent boxComp = new BoundingBoxComponent();
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
       boxComp.type = CollisionManager.STRUCTURE;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
-
       brick.addComponent(boxComp);
-      brick.addComponent(c);
+
+      BrickControllerComponent controller = new BrickControllerComponent();
+      brick.addComponent(controller);
+
       return brick;
     }
 
@@ -1149,6 +1242,35 @@ class GameObjectFactory {
       goomba.addComponent(boxComp);
 
       return goomba;
+    }
+
+    else if(id == "coinbox"){
+      GameObject coinBox = new GameObject();
+      coinBox.addTag("coinbox");
+
+      AnimationComponent aniComp = new AnimationComponent();
+      coinBox.addComponent(aniComp);
+
+      AnimationClip dead = new AnimationClip();
+      dead.addFrame("props/coinbox/dead.png");
+
+      AnimationClip idle = new AnimationClip();
+      idle.addFrame("props/coinbox/idle1.png");
+      idle.addFrame("props/coinbox/idle2.png");
+      idle.addFrame("props/coinbox/idle3.png");
+
+      /*CoinBoxBoundingBoxComponent boxComp = new CoinBoxBoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+      boxComp.type = CollisionManager.STRUCTURE;
+      boxComp.addComponent(boxComp);
+
+      CoinBoxControllerComponent controller = new CoinBoxControllerComponent();
+      controller.setNumCoins(10);*/
+      // Add list?
+
+      return coinBox;
     }
 
     //
@@ -1212,16 +1334,45 @@ class GoombaControllerComponent extends SpriteControllerComponent {
     animationComponent = (AnimationComponent)gameObject.getComponent("AnimationComponent");
   }
 
+  void kick(){
+    //BoundingBoxComponent bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    //gameObject.removeComponent("BoundingBoxComponent");
+    
+    PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+    if(physics != null){
+      physics.setHasFriction(true);
+      physics.applyForce(10, 150);
+      physics.setGravity(0, -500);
+      physics.setTouhcingFloor(false);
+
+      // 1) invalidate object?
+      // 2) disable object?
+      // 3) update components to tell them which ones are valid?
+      // 4) nullify objects?
+      // 5) make component get component continusouly.?
+      // ????
+      gameObject.removeComponent("BoundingBoxComponent");
+
+      AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+      ani.setFlipY(true);
+    }
+  }
+
   void squash() {
     animationComponent.play("squashed");
     deathTimer = new Timer();
     isAlive = false;
+
+    PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+    physics.stop();
+
     //gameObject.velocity.set(0,0);
-    gameObject.removeComponent("PhysicsComponent");
-    gameObject.removeComponent("BoundingBoxComponent");
+    //gameObject.removeComponent("PhysicsComponent");
+    //gameObject.removeComponent("BoundingBoxComponent");
   }
 
   void update(float dt) {
+    super.update(dt);
     if(deathTimer != null){
       deathTimer.tick();
       if(deathTimer.getTotalTime() > 0.5){
@@ -1540,6 +1691,18 @@ class MarioControllerComponent extends Component {
     }
   }
 
+  void hitStructureY(GameObject structure){
+    // landed on top
+    if(gameObject.position.y > structure.position.y){
+      println("FIX hitStructureY()");
+    }
+    else{
+      physics.setVelocityY(0);
+      StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
+      controller.hit(gameObject);
+    }
+  }
+
   // player can only jump if they are touching the floor.
   // TODO: later add if touching platform
   boolean canJump() {
@@ -1553,7 +1716,7 @@ class PatrolEnemyPhysicsComponent extends PhysicsComponent {
 
   PatrolEnemyPhysicsComponent() {
     super();
-    //componentName = "PatrolEnemyPhysicsComponent";		
+    componentName = "PhysicsComponent";
 
     setVelocity(-32, 0);
     setMaxXSpeed(32);
@@ -1606,6 +1769,7 @@ class PhysicsComponent extends Component {
     velocity = new PVector();
     acceleration = new PVector();
     drag = new PVector();
+
     gravity = new PVector(0, -1800);
 
     maxXSpeed = 1;
@@ -1620,7 +1784,7 @@ class PhysicsComponent extends Component {
 
   void awake() {
     super.awake();
-    // fix cast
+    // TODO: fix cast
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
 
     if (boundingBox == null) {
@@ -1634,12 +1798,6 @@ class PhysicsComponent extends Component {
 
   void setTouhcingFloor(boolean b) {
     _isTouchingFloor = b;
-    if (b) {
-      gravity.y = 0;
-    }
-    else {
-      gravity.y = -100;
-    }
   }
 
   void setGravity(float x, float y) {
@@ -1687,21 +1845,32 @@ class PhysicsComponent extends Component {
 
     // If we went past the floor after jumping
     // place us at the floor level
-    if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
-      position.y = groundY + boundingBox.h;
-      _isTouchingFloor = true;
-      velocity.y = 0;
-      //velocity.set(0, 0);
+    // TODO: fix
+    boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    if(boundingBox != null){
+      if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
+        position.y = groundY + boundingBox.h;
+        _isTouchingFloor = true;
+        velocity.y = 0;
+        //velocity.set(0, 0);
+      }
+      else if (isTouchingFloor()) {
+        position.y = groundY + boundingBox.h;
+      }
     }
-    else if (isTouchingFloor()) {
-      position.y = groundY + boundingBox.h;
-    }
-
     gameObject.position.set(position.x, position.y);
   }
 
   void setGroundY(float y) {
     groundY = y;
+  }
+
+  void setVelocityY(float y){
+    velocity.y = y;
+  }
+
+  void setVelocityX(float x){
+    velocity.x = x;
   }
 
   void render() {
@@ -1744,6 +1913,11 @@ class PhysicsComponent extends Component {
   void setVelocity(float x, float y) {
     velocity.x = x;
     velocity.y = y;
+  }
+
+  void stop(){
+    velocity.set(0,0);
+    acceleration.set(0,0);
   }
 
   boolean isAtRest() {
@@ -1801,15 +1975,18 @@ class Scene {
     gameObjects.add(player);
     gameObjects.add(gameCamera);
 
+    // TODO fix: hack to render goomba behind mario
+    // after squash.
     generateGroundTiles();
+    
     generateCoins();
     //generateBrickTiles(5);
     //generateBrickTiles(6);
     generateStaircase();
     generateGoombas();
+    
     generateSpineys();
     generateClouds();
-
     awake();
   }
 
@@ -1841,6 +2018,7 @@ class Scene {
     if (isPaused) {
       return;
     }
+
     soundManager.playSound("pause");
     timer.pause();
     isPaused = true;
@@ -1873,10 +2051,9 @@ class Scene {
 
   void render() {
     background(96, 160, 255);
-    //background(0, 0, 0);
 
-    debug.addString("(" + width + "," + height + ")");
-    debug.addString("" + int(frameRate));
+    debug.addString("Dimensions: [" + width + "," + height + "]");
+    debug.addString("FPS: " + int(frameRate));
     debug.addString("collision check time: " + collisionCheckTime);
 
     renderTimer.reset();
@@ -1896,7 +2073,7 @@ class Scene {
     camComp.postRender();
     renderTimer.tick();
 
-    debug.addString("render time: " + renderTimer.getTotalTime());
+    debug.addString("Render time: " + renderTimer.getTotalTime());
 
     // Find any objects that need to be removed from the scene
     for (int i = gameObjects.size()-1; i >= 0; i--) {
@@ -1986,6 +2163,13 @@ class Scene {
         collisionManager.add(brick);
       }
     }
+
+    for(int i = 0; i < 10; i++){
+      GameObject brick1 = gameObjectFactory.create("brick");
+      brick1.setPosition(i *TILE_SIZE, TILE_SIZE * 4);
+      gameObjects.add(brick1);
+      collisionManager.add(brick1);
+    }      
   }
 
   void generateBrickTiles(int y) {
@@ -1998,7 +2182,6 @@ class Scene {
     }
   }
 }
-
 /////////////////////////////
 // SpriteControllerComponent
 /////////////////////////////
@@ -2030,9 +2213,17 @@ class SpriteControllerComponent extends Component {
   void hurt() {
   }
 
+  void update(float dt){
+    // TODO: fix
+    if(gameObject.position.y < -500){
+      gameObject.slateForRemoval();
+    }
+  }
+
   // 
   void squash() {
    if(squashable){
+
       gameObject.slateForRemoval();
     }
   }
@@ -2066,7 +2257,30 @@ class SpriteControllerComponent extends Component {
     // remove boundingbox?
   }
 }
+/////////////////////////////////
+// StructureControllerComponent
+/////////////////////////////////
+class StructureControllerComponent extends Component {
 
+  StructureControllerComponent() {
+    super();
+    componentName = "StructureControllerComponent";
+  }
+
+  void awake() {
+    super.awake();
+  }
+
+  void update(float dt) {
+    super.update(dt);
+  }
+
+  void render() {
+  }
+
+  void hit(GameObject other){
+  }
+}
 //////////
 // Timer
 //////////
