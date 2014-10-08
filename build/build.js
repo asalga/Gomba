@@ -90,6 +90,10 @@ void keyPressed() {
     scene.pause();
   }
 
+  if(Keyboard.isKeyDown(KEY_R)) {
+    scene.load();
+  }
+
   if (Keyboard.isKeyDown(KEY_C)) {
   }
 
@@ -157,6 +161,7 @@ class AnimationComponent extends Component {
   AnimationClip currentClip;
   protected boolean flipX;
   protected boolean flipY;
+  boolean paused;
 
   AnimationComponent() {
     componentName = "AnimationComponent";
@@ -164,6 +169,7 @@ class AnimationComponent extends Component {
     currentClip = null;
     flipX = false;
     flipY = false;
+    paused = false;
   }
 
   void addClip(String clipName, AnimationClip clip) {
@@ -171,6 +177,10 @@ class AnimationComponent extends Component {
   }
 
   void update(float dt) {
+    if(paused){
+      return;
+    }
+    
     if (currentClip != null) {
       currentClip.update(dt);
     }
@@ -199,6 +209,17 @@ class AnimationComponent extends Component {
 
   void play(String clipName) {
     currentClip = clips.get(clipName);
+  }
+
+  /*
+
+  */
+  void pause(){
+    paused = true;
+  }
+
+  void resume(){
+    paused = false;
   }
 
   void setFlipX(boolean b) {
@@ -518,6 +539,7 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
           mario.hurt();
         }
         else{
+          sprite.squash();
           mario.jumpOffEnemy();
         }
       }
@@ -833,10 +855,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     if(other.hasTag("player")) {
       SpriteControllerComponent sprite = (SpriteControllerComponent)gameObject.getComponent("SpriteControllerComponent");
       MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-
-      if(sprite != null && sprite.canBeSquashed()){
-        sprite.squash();
-      }
+      // do what here? logic is already used for BoundingBoxYComponent/BoundingBoxXComponent
     }
 
     //
@@ -848,7 +867,6 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     // If hit side of something, reversedirection
     // If hit the top of something, land()
   }
-
 
   boolean doesFallsOffLedge() {
     return _fallsOffLedge;
@@ -1335,27 +1353,7 @@ class GoombaControllerComponent extends SpriteControllerComponent {
   }
 
   void kick(){
-    //BoundingBoxComponent bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
-    //gameObject.removeComponent("BoundingBoxComponent");
-    
-    PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    if(physics != null){
-      physics.setHasFriction(true);
-      physics.applyForce(10, 150);
-      physics.setGravity(0, -500);
-      physics.setTouhcingFloor(false);
-
-      // 1) invalidate object?
-      // 2) disable object?
-      // 3) update components to tell them which ones are valid?
-      // 4) nullify objects?
-      // 5) make component get component continusouly.?
-      // ????
-      gameObject.removeComponent("BoundingBoxComponent");
-
-      AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-      ani.setFlipY(true);
-    }
+    super.kick();
   }
 
   void squash() {
@@ -1383,6 +1381,7 @@ class GoombaControllerComponent extends SpriteControllerComponent {
 
   void render() {
   }
+
 }
 /////////////
 // Keyboard
@@ -1808,6 +1807,8 @@ class PhysicsComponent extends Component {
   void update(float dt) {
     if (isTouchingFloor() == false) {
       velocity.y += gravity.y * dt;
+      debug.addString(">> " + groundY);
+      debug.addString(">> " + velocity.y);
     }
 
     velocity.add(acceleration);
@@ -1845,13 +1846,17 @@ class PhysicsComponent extends Component {
 
     // If we went past the floor after jumping
     // place us at the floor level
-    // TODO: fix
+    
+    // TODO: FIX. Don't call getComponent per update()
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
     if(boundingBox != null){
       if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
         position.y = groundY + boundingBox.h;
         _isTouchingFloor = true;
         velocity.y = 0;
+        
+        ///  FIX ME!!!
+
         //velocity.set(0, 0);
       }
       else if (isTouchingFloor()) {
@@ -2191,13 +2196,13 @@ class SpriteControllerComponent extends Component {
 
   boolean isAlive;
   boolean squashable;
-  boolean _doesHurtPlayerOnSquash;
+  boolean hurtsPlayerOnSquash;
 
   SpriteControllerComponent() {
     super();
     componentName = "SpriteControllerComponent";
     squashable = true;
-    _doesHurtPlayerOnSquash = false;
+    hurtsPlayerOnSquash = false;
   }
 
   boolean isFalling() {
@@ -2209,6 +2214,7 @@ class SpriteControllerComponent extends Component {
     return squashable;
   }
 
+  // TODO: fix
   // they can be hurt in different ways..
   void hurt() {
   }
@@ -2223,7 +2229,6 @@ class SpriteControllerComponent extends Component {
   // 
   void squash() {
    if(squashable){
-
       gameObject.slateForRemoval();
     }
   }
@@ -2234,27 +2239,49 @@ class SpriteControllerComponent extends Component {
   void walk() {
   }
 
-  void kick(){
-    gameObject.slateForRemoval();
+  void kick() {
+    //BoundingBoxComponent bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    //gameObject.removeComponent("BoundingBoxComponent");
+    
+    PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+    if(physics != null){
+      //physics.setHasFriction(true);//?
+      physics.setGroundY(-600);
+      //physics.setGravity(0, -150);
+      physics.applyForce(0, 10);
+      physics.setTouhcingFloor(false);
+      // disconnect?
+
+      // 1) invalidate object?
+      // 2) disable object?
+      // 3) update components to tell them which ones are valid?
+      // 4) nullify objects?
+      // 5) make component get component continusouly.?
+      // ????
+      gameObject.removeComponent("BoundingBoxComponent");
+
+      // It would look strange if the animation kept playing, so pause it.
+      AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+      ani.pause();
+      ani.setFlipY(true);
+    }
   }
 
   boolean doesHurtPlayerOnSquash(){
-    return _doesHurtPlayerOnSquash;
+    return hurtsPlayerOnSquash;
   }
 
   void setDoesHurtPlayerOnSquash(boolean b){
-    _doesHurtPlayerOnSquash = b;
+    hurtsPlayerOnSquash = b;
   }
 
   void setSquashable(boolean b){
     squashable = b;
   }
 
-  // If hit by invinsible mario, any sprite is immediately killed
+  // If hit by invinsible mario, sprites are immediately killed
   void kill() {
-    // play animation
-    // set physics component
-    // remove boundingbox?
+    kick();
   }
 }
 /////////////////////////////////
