@@ -90,6 +90,10 @@ void keyPressed() {
     scene.pause();
   }
 
+  if(Keyboard.isKeyDown(KEY_R)) {
+    scene.load();
+  }
+
   if (Keyboard.isKeyDown(KEY_C)) {
   }
 

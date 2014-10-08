@@ -7,6 +7,7 @@ class AnimationComponent extends Component {
   AnimationClip currentClip;
   protected boolean flipX;
   protected boolean flipY;
+  boolean paused;
 
   AnimationComponent() {
     componentName = "AnimationComponent";
@@ -14,6 +15,7 @@ class AnimationComponent extends Component {
     currentClip = null;
     flipX = false;
     flipY = false;
+    paused = false;
   }
 
   void addClip(String clipName, AnimationClip clip) {
@@ -21,6 +23,10 @@ class AnimationComponent extends Component {
   }
 
   void update(float dt) {
+    if(paused){
+      return;
+    }
+    
     if (currentClip != null) {
       currentClip.update(dt);
     }
@@ -49,6 +55,17 @@ class AnimationComponent extends Component {
 
   void play(String clipName) {
     currentClip = clips.get(clipName);
+  }
+
+  /*
+
+  */
+  void pause(){
+    paused = true;
+  }
+
+  void resume(){
+    paused = false;
   }
 
   void setFlipX(boolean b) {

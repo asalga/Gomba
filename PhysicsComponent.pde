@@ -70,6 +70,8 @@ class PhysicsComponent extends Component {
   void update(float dt) {
     if (isTouchingFloor() == false) {
       velocity.y += gravity.y * dt;
+      debug.addString(">> " + groundY);
+      debug.addString(">> " + velocity.y);
     }
 
     velocity.add(acceleration);
@@ -107,13 +109,17 @@ class PhysicsComponent extends Component {
 
     // If we went past the floor after jumping
     // place us at the floor level
-    // TODO: fix
+    
+    // TODO: FIX. Don't call getComponent per update()
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
     if(boundingBox != null){
       if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
         position.y = groundY + boundingBox.h;
         _isTouchingFloor = true;
         velocity.y = 0;
+        
+        ///  FIX ME!!!
+
         //velocity.set(0, 0);
       }
       else if (isTouchingFloor()) {

@@ -42,6 +42,7 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
           mario.hurt();
         }
         else{
+          sprite.squash();
           mario.jumpOffEnemy();
         }
       }

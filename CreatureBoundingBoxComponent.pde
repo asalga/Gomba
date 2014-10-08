@@ -36,10 +36,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     if(other.hasTag("player")) {
       SpriteControllerComponent sprite = (SpriteControllerComponent)gameObject.getComponent("SpriteControllerComponent");
       MarioControllerComponent mario = (MarioControllerComponent)other.getComponent("MarioControllerComponent");
-
-      if(sprite != null && sprite.canBeSquashed()){
-        sprite.squash();
-      }
+      // do what here? logic is already used for BoundingBoxYComponent/BoundingBoxXComponent
     }
 
     //
@@ -51,7 +48,6 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     // If hit side of something, reversedirection
     // If hit the top of something, land()
   }
-
 
   boolean doesFallsOffLedge() {
     return _fallsOffLedge;
