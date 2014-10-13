@@ -25,7 +25,7 @@ class GoombaControllerComponent extends SpriteControllerComponent {
   void squash() {
     animationComponent.play("squashed");
     deathTimer = new Timer();
-    isAlive = false;
+    alive = false;
 
     PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.stop();

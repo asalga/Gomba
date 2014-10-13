@@ -4,10 +4,19 @@
 
 static float EPSILON = 0.00001;
 boolean isPJSMode = false;
+boolean debugPrint = false;
 
 String PVectorToString(PVector vec) {
   return "" + vec.x + ", " + vec.y;
 }
+
+void dprintln(String s){
+  if(debugPrint){
+    println(s);
+  }
+}
+
+
 
 // ArtManager needs this in order to determine which
 // parser to use.

@@ -4,7 +4,7 @@
 class MarioControllerComponent extends Component {
 
   final float walkForce = 20; //550
-  final float jumpForce = 550; //350
+  final float jumpForce = 650; //350
   //BoundingBoxComponent boundingBox;
 
   PhysicsComponent physics;
@@ -60,9 +60,9 @@ class MarioControllerComponent extends Component {
       }
     }
 
-    if (gameObject.position.y >= height) {
-      _isJumping = false;
-    }
+    //if (gameObject.position.y >= height) {
+      //_isJumping = false;
+    //}
 
     if (isIdle()) {
       idle();
@@ -86,11 +86,40 @@ class MarioControllerComponent extends Component {
   }
 
   void jump() {
-    if (canJump()) {
+    // If the player is told to jump but they already are touching
+    // a structure at the top, ignore the call.
+    BoundingBoxComponent boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    HashMap<String, GameObject> colliders = boundingBox.colliders;
+    for(String key : colliders.keySet()){
+      GameObject go = colliders.get(key);
+      BoundingBoxComponent bb = (BoundingBoxComponent)go.getComponent("BoundingBoxComponent");
+      if(bb.y > boundingBox.y){
+
+        StructureControllerComponent controller = (StructureControllerComponent)go.getComponent("StructureControllerComponent");
+        if(controller != null){
+          controller.hit(gameObject);
+
+          soundManager.playSound("jump");
+          animation.play("jump");
+        }
+
+        return;
+      }
+    }
+
+    // Add check for when touching top of structure
+    if (canJump() && _isJumping == false) {
+      dprintln("jump()");
+
+      physics.setTouhcingFloor(false);
       physics.applyForce(0, jumpForce);
       soundManager.playSound("jump");
       animation.play("jump");
       _isJumping = true;
+
+      // assume we'll land on the floor.
+      // PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+      // physics.setGroundY(32);
     }
   }
 
@@ -130,16 +159,35 @@ class MarioControllerComponent extends Component {
     }
   }
 
+  void fall(){
+    PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+    dprintln("fall()");
+
+    phy.setGroundY(TILE_SIZE);
+    phy.setTouhcingFloor(false);
+    phy.velocity.y = 0;
+    animation.play("jump");
+  }
+
   void hitStructureY(GameObject structure){
-    // landed on top
+    // LANDED ON TOP
     if(gameObject.position.y > structure.position.y){
-      println("FIX hitStructureY()");
+      _isJumping = false;
     }
+    // PUNCHED
     else{
-      physics.setVelocityY(0);
-      StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
-      controller.hit(gameObject);
+      if(getJumpState()){
+        dprintln("Punched strucure");
+        physics.setVelocityY(0);
+
+        StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
+        controller.hit(gameObject);
+      }
     }
+  }
+
+  boolean getJumpState(){
+    return _isJumping;
   }
 
   // player can only jump if they are touching the floor.

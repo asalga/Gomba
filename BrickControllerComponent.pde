@@ -7,6 +7,7 @@ class BrickControllerComponent extends StructureControllerComponent{
 	boolean bouncing;
 	float original;
 	BoundingBoxComponent bounds;
+	AnimationComponent animation;
 
 	BrickControllerComponent(){
 		super();
@@ -17,6 +18,7 @@ class BrickControllerComponent extends StructureControllerComponent{
 	void awake(){
 		super.awake();
 		bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+		animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
 	}
 
 	void hit(GameObject other){
@@ -42,12 +44,17 @@ class BrickControllerComponent extends StructureControllerComponent{
 	void update(float dt){
 		if(bouncing == true){
 			y += dt * 15.0;
-			gameObject.position.y = original + 15 * sin(y);
+
+			if(animation != null){
+				// TODO: fix
+				float ytemp = (15 * sin(y));
+				animation.setPosition(0, ytemp);
+			}
 		}
 		if(y >= PI){
 			y = 0;
 			bouncing = false;
-			gameObject.position.y = original;
+			animation.setPosition(0, 0);
 		}
 	}
 }

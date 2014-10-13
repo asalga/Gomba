@@ -14,6 +14,16 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
   void onCollisionExit(GameObject other) {
     super.onCollisionExit(other);
+
+    if (colliders.isEmpty()) {
+      MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+      if(mario.getJumpState() == false){
+        mario.fall();
+      }
+      else{
+        dprintln("On Collisionexit()");
+      }
+    }
   }
   
   void onCollisionEnter(GameObject other) {
@@ -55,6 +65,19 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
     // STRUCTURE
     else if(other.hasTag("structure")){
       mario.hitStructureY(other);
+
+      PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+
+       // LANDING but only if player was actually in the air
+      if (gameObject.position.y > other.position.y && phy.isTouchingFloor() == false ) {
+        
+        phy.landed();
+
+        phy.setGroundY(other.position.y);
+        phy.setTouhcingFloor(true);
+
+        mario._isJumping = false;
+      }
     }
   } 
 }

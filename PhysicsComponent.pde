@@ -30,9 +30,9 @@ class PhysicsComponent extends Component {
     position = new PVector();
     velocity = new PVector();
     acceleration = new PVector();
-    drag = new PVector();
 
-    gravity = new PVector(0, -1800);
+    drag = new PVector();
+    gravity = new PVector(0, -1500);
 
     maxXSpeed = 1;
     mass = 1;
@@ -52,6 +52,7 @@ class PhysicsComponent extends Component {
     if (boundingBox == null) {
       println("Could not find boundingBox component");
     }
+    landed();
   }
 
   boolean isTouchingFloor() {
@@ -68,10 +69,9 @@ class PhysicsComponent extends Component {
   }
 
   void update(float dt) {
+
     if (isTouchingFloor() == false) {
       velocity.y += gravity.y * dt;
-      debug.addString(">> " + groundY);
-      debug.addString(">> " + velocity.y);
     }
 
     velocity.add(acceleration);
@@ -113,14 +113,16 @@ class PhysicsComponent extends Component {
     // TODO: FIX. Don't call getComponent per update()
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
     if(boundingBox != null){
-      if (isTouchingFloor() == false && position.y - boundingBox.h < groundY) {
+
+      // 
+      if (isTouchingFloor() == false && position.y - boundingBox.h <= groundY) {
+        /*
         position.y = groundY + boundingBox.h;
         _isTouchingFloor = true;
-        velocity.y = 0;
-        
-        ///  FIX ME!!!
-
-        //velocity.set(0, 0);
+        velocity.y = 0;        
+        MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
+        mario._isJumping = false;
+        */
       }
       else if (isTouchingFloor()) {
         position.y = groundY + boundingBox.h;
@@ -131,6 +133,13 @@ class PhysicsComponent extends Component {
 
   void setGroundY(float y) {
     groundY = y;
+  }
+
+  void landed(){
+    dprintln("landed");
+    position.y = groundY + boundingBox.h;
+    _isTouchingFloor = true;
+    velocity.y = 0;
   }
 
   void setVelocityY(float y){
