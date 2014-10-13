@@ -22,7 +22,7 @@ class GameObjectFactory {
       aniComp.addClip("jump", jumpClip);
 
       AnimationClip idleClip = new AnimationClip();
-      idleClip.addFrame("chars/mario/idle.png");  
+      idleClip.addFrame("chars/mario/idle.png");
       aniComp.addClip("idle", idleClip);
       aniComp.play("idle");
 
@@ -102,19 +102,27 @@ class GameObjectFactory {
     //
     else if (id == "ground") {
       GameObject ground = new GameObject();
+      ground.addTag("structure");
+
       WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/structure/ground.png";
       ground.addComponent(c);
 
-      // For now, reduce collision checks and use a 'fake' ground in physics comp.
-      /*BoundingBoxComponent boxComp = new BoundingBoxComponent();
-       boxComp.w = TILE_SIZE;
-       boxComp.h = TILE_SIZE;
-       ground.addComponent(boxComp);
-       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
-       boxComp.type = CollisionManager.STRUCTURE;
-       GroundCollisionComponent collisionComp = new GroundCollisionComponent();
-       ground.addComponent(collisionComp);*/
+      BoundingBoxComponent boxComp = new BoundingBoxComponent();
+      boxComp.w = TILE_SIZE;
+      boxComp.h = TILE_SIZE;
+      boxComp.type = CollisionManager.STRUCTURE;
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+      ground.addComponent(boxComp);
+
+      AnimationClip idleClip = new AnimationClip();
+      idleClip.addFrame("props/structure/ground.png");
+      AnimationComponent animation = new AnimationComponent();
+      animation.addClip("idle", idleClip);
+      animation.play("idle");
+      ground.addComponent(animation);
+
+      BrickControllerComponent controller = new BrickControllerComponent();
+      ground.addComponent(controller);
 
       return ground;
     }
@@ -124,11 +132,24 @@ class GameObjectFactory {
     //
     else if (id == "cloud") {
       GameObject cloud = new GameObject();
-      WrapAroundComponent c = new WrapAroundComponent();
-      c.imgPath = "props/clouds/cloud1.png";
-      c.extraBuffer = TILE_SIZE * 9;
+      
+      WrapAroundComponent wrapAround = new WrapAroundComponent();
+      wrapAround.extraBuffer = TILE_SIZE * 9;
       cloud.position.y = height - TILE_SIZE;
-      cloud.addComponent(c);
+      cloud.addComponent(wrapAround);
+
+      AnimationClip idleClip = new AnimationClip();
+      idleClip.addFrame("props/clouds/cloud1.png");
+      AnimationComponent animation = new AnimationComponent();
+      animation.addClip("idle", idleClip);
+      animation.play("idle");
+      cloud.addComponent(animation);
+
+      BoundingBoxComponent boxComp = new BoundingBoxComponent();
+      boxComp.w = TILE_SIZE * 2;
+      boxComp.h = TILE_SIZE * 2;
+      cloud.addComponent(boxComp);
+
       return cloud;
     }
 
@@ -140,7 +161,6 @@ class GameObjectFactory {
       brick.addTag("structure");
 
       WrapAroundComponent wrapAround = new WrapAroundComponent();
-      wrapAround.imgPath = "props/structure/bricks.png";
       brick.addComponent(wrapAround);
 
       BoundingBoxComponent boxComp = new BoundingBoxComponent();
@@ -149,6 +169,13 @@ class GameObjectFactory {
       boxComp.type = CollisionManager.STRUCTURE;
       boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
       brick.addComponent(boxComp);
+
+      AnimationClip idleClip = new AnimationClip();
+      idleClip.addFrame("props/structure/bricks.png");
+      AnimationComponent animation = new AnimationComponent();
+      animation.addClip("idle", idleClip);
+      animation.play("idle");
+      brick.addComponent(animation);
 
       BrickControllerComponent controller = new BrickControllerComponent();
       brick.addComponent(controller);

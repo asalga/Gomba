@@ -208,7 +208,7 @@ class Scene {
       GameObject ground = gameObjectFactory.create("ground");
       ground.setPosition(x, TILE_SIZE);
       gameObjects.add(ground);
-      //collisionManager.add(ground);
+      collisionManager.add(ground);
     }
   }
 

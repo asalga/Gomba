@@ -3,23 +3,20 @@
 ////////////////////////
 class WrapAroundComponent extends Component {
 
-  PImage img;
-  String imgPath;
   PVector position;
   float extraBuffer;
+  BoundingBoxComponent bounds;
 
   WrapAroundComponent() {
     super();
     componentName = "WrapAroundComponent";
-    img = null;
-    imgPath = "";
     position = new PVector();
     extraBuffer = 0;
   }
 
   void awake() {
     super.awake();
-    img = artManager.getImage(imgPath);
+    bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
   }
 
   void update(float dt) {
@@ -28,17 +25,13 @@ class WrapAroundComponent extends Component {
     scene.getActiveCamera();
     PVector dir = scene.getActiveCamera().getVelocity();
 
-    if (dir.x > 0 && gameObject.position.x + img.width < camPos.x) {
-      gameObject.position.x += width + img.width + extraBuffer;
+    if (dir.x > 0 && gameObject.position.x + bounds.w < camPos.x) {
+      gameObject.position.x += width + bounds.w + extraBuffer;
     }
     // player walks left
     else if (dir.x < 0 && gameObject.position.x > camPos.x + width) {
-      gameObject.position.x -= width + img.width + extraBuffer;
+      gameObject.position.x -= width + bounds.w + extraBuffer;
     }
-  }
-
-  void render() {
-    image(img, gameObject.position.x, -gameObject.position.y);
   }
 }
 

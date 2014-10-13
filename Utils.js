@@ -4,6 +4,7 @@
 
 static float EPSILON = 0.00001;
 boolean isPJSMode = true;
+boolean debugPrint = false;
 
 String PVectorToString(PVector vec) {
   return "" + vec.x + ", " + vec.y;
@@ -16,6 +17,11 @@ String getFileExtension(String path) {
   return tokens[tokens.length - 1];
 }
 
+void dprintln(String s){
+  if(debugPrint){
+    println(s);
+  }
+}
 
 
 public static class Utils {

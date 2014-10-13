@@ -29,7 +29,10 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
         return;
       }
 
-      mario.hurt();
+      //
+      if(sprite.isAlive()){
+        mario.hurt();
+      }
     }
     
     // COIN

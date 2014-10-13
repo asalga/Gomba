@@ -5,13 +5,14 @@ class SpriteControllerComponent extends Component {
 
   // SpriteController component manages behvaviour of sprites
 
-  boolean isAlive;
+  boolean alive;
   boolean squashable;
   boolean hurtsPlayerOnSquash;
 
   SpriteControllerComponent() {
     super();
     componentName = "SpriteControllerComponent";
+    alive = true;
     squashable = true;
     hurtsPlayerOnSquash = false;
   }
@@ -39,7 +40,9 @@ class SpriteControllerComponent extends Component {
 
   // 
   void squash() {
-   if(squashable){
+    // TODO: remove??
+    if(squashable) {
+      alive = false;
       gameObject.slateForRemoval();
     }
   }
@@ -70,7 +73,8 @@ class SpriteControllerComponent extends Component {
       // 5) make component get component continusouly.?
       // ????
       gameObject.removeComponent("BoundingBoxComponent");
-
+  
+      alive = false;
       // It would look strange if the animation kept playing, so pause it.
       AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
       ani.pause();
@@ -93,5 +97,9 @@ class SpriteControllerComponent extends Component {
   // If hit by invinsible mario, sprites are immediately killed
   void kill() {
     kick();
+  }
+
+  boolean isAlive(){
+    return alive;
   }
 }
