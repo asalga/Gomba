@@ -111,7 +111,7 @@ class MarioControllerComponent extends Component {
     if (canJump() && _isJumping == false) {
       dprintln("jump()");
 
-      physics.setTouhcingFloor(false);
+      physics.setTouchingFloor(false);
       physics.applyForce(0, jumpForce);
       soundManager.playSound("jump");
       animation.play("jump");
@@ -164,7 +164,7 @@ class MarioControllerComponent extends Component {
     dprintln("fall()");
 
     phy.setGroundY(TILE_SIZE);
-    phy.setTouhcingFloor(false);
+    phy.setTouchingFloor(false);
     phy.velocity.y = 0;
     animation.play("jump");
   }
@@ -172,6 +172,7 @@ class MarioControllerComponent extends Component {
   void hitStructureY(GameObject structure){
     // LANDED ON TOP
     if(gameObject.position.y > structure.position.y){
+      dprintln("Landed on top");
       _isJumping = false;
     }
     // PUNCHED

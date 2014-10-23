@@ -59,7 +59,7 @@ class PhysicsComponent extends Component {
     return _isTouchingFloor;
   }
 
-  void setTouhcingFloor(boolean b) {
+  void setTouchingFloor(boolean b) {
     _isTouchingFloor = b;
   }
 

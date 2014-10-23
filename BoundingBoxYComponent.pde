@@ -70,11 +70,10 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
        // LANDING but only if player was actually in the air
       if (gameObject.position.y > other.position.y && phy.isTouchingFloor() == false ) {
-        
         phy.landed();
 
         phy.setGroundY(other.position.y);
-        phy.setTouhcingFloor(true);
+        phy.setTouchingFloor(true);
 
         mario._isJumping = false;
       }
