@@ -531,20 +531,19 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
   void onCollisionExit(GameObject other) {
     super.onCollisionExit(other);
+    dprintln("OnCollisionExit() [" + other.id + ", " +  gameObject.id + "]");
 
     if (colliders.isEmpty()) {
       MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
       if(mario.getJumpState() == false){
         mario.fall();
       }
-      else{
-        dprintln("On Collisionexit()");
-      }
     }
   }
   
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
+    dprintln("OnCollisionEnter() [" + other.id + ", " +  gameObject.id + "]");
 
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
@@ -587,11 +586,12 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
        // LANDING but only if player was actually in the air
       if (gameObject.position.y > other.position.y && phy.isTouchingFloor() == false ) {
-        
+        dprintln("BBY - Landing");
+
         phy.landed();
 
         phy.setGroundY(other.position.y);
-        phy.setTouhcingFloor(true);
+        phy.setTouchingFloor(true);
 
         mario._isJumping = false;
       }
@@ -888,7 +888,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     // if we are no longer colliding with anything, then fall
     if (colliders.isEmpty()) {
       phy.setGroundY(TILE_SIZE);
-      phy.setTouhcingFloor(false);
+      phy.setTouchingFloor(false);
     }
   }
 
@@ -904,7 +904,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     //
     if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
       phy.setGroundY(other.position.y);
-      phy.setTouhcingFloor(true);
+      phy.setTouchingFloor(true);
     }
 
     // If hit side of something, reversedirection
@@ -1732,17 +1732,20 @@ class MarioControllerComponent extends Component {
           soundManager.playSound("jump");
           animation.play("jump");
         }
-
         return;
       }
     }
 
+    if(canJump() == false){
+      println("MCC - canJump() returns false");
+    }
+
     // Add check for when touching top of structure
     if (canJump() && _isJumping == false) {
-      dprintln("jump()");
+      dprintln("MCC - jump()");
 
-      physics.setTouhcingFloor(false);
-      physics.applyForce(0, jumpForce);
+      physics.setTouchingFloor(false);
+      physics.applyJumpForce(jumpForce);
       soundManager.playSound("jump");
       animation.play("jump");
       _isJumping = true;
@@ -1790,18 +1793,21 @@ class MarioControllerComponent extends Component {
   }
 
   void fall(){
+    dprintln("MCC - fall()");
+
     PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    dprintln("fall()");
 
     phy.setGroundY(TILE_SIZE);
-    phy.setTouhcingFloor(false);
+    phy.setTouchingFloor(false);
     phy.velocity.y = 0;
+
     animation.play("jump");
   }
 
   void hitStructureY(GameObject structure){
     // LANDED ON TOP
     if(gameObject.position.y > structure.position.y){
+      dprintln("Landed on top");
       _isJumping = false;
     }
     // PUNCHED
@@ -1914,7 +1920,7 @@ class PhysicsComponent extends Component {
     return _isTouchingFloor;
   }
 
-  void setTouhcingFloor(boolean b) {
+  void setTouchingFloor(boolean b) {
     _isTouchingFloor = b;
   }
 
@@ -1925,6 +1931,7 @@ class PhysicsComponent extends Component {
 
   void update(float dt) {
 
+    // if the player is in the air, we apply gravity
     if (isTouchingFloor() == false) {
       velocity.y += gravity.y * dt;
     }
@@ -1991,7 +1998,7 @@ class PhysicsComponent extends Component {
   }
 
   void landed(){
-    dprintln("landed");
+    dprintln("PCC - landed()");
     position.y = groundY + boundingBox.h;
     _isTouchingFloor = true;
     velocity.y = 0;
@@ -2021,12 +2028,6 @@ class PhysicsComponent extends Component {
     maxXSpeed = m;
   }
 
-  void applyForce(float x, float y) {
-    acceleration.x += x;
-    acceleration.y += y;
-    checkIfGrounded();
-  }
-
   void checkIfGrounded() {
     if (acceleration.y != 0) {
       _isTouchingFloor = false;
@@ -2034,7 +2035,17 @@ class PhysicsComponent extends Component {
   }
 
   void applyForce(PVector force) {
-    acceleration.add(force);
+    applyForce(force.x, force.y);
+  }
+
+  void applyJumpForce(float y) {
+    velocity.y = 0;
+    applyForce(0, y);
+  }
+
+  void applyForce(float x, float y) {
+    acceleration.x += x;
+    acceleration.y += y;
     checkIfGrounded();
   }
 
@@ -2379,7 +2390,7 @@ class SpriteControllerComponent extends Component {
       physics.setGroundY(-600);
       //physics.setGravity(0, -150);
       physics.applyForce(0, 10);
-      physics.setTouhcingFloor(false);
+      physics.setTouchingFloor(false);
       // disconnect?
 
       // 1) invalidate object?
