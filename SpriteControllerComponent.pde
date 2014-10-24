@@ -63,7 +63,7 @@ class SpriteControllerComponent extends Component {
       physics.setGroundY(-600);
       //physics.setGravity(0, -150);
       physics.applyForce(0, 10);
-      physics.setTouhcingFloor(false);
+      physics.setTouchingFloor(false);
       // disconnect?
 
       // 1) invalidate object?

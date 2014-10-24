@@ -26,7 +26,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     // if we are no longer colliding with anything, then fall
     if (colliders.isEmpty()) {
       phy.setGroundY(TILE_SIZE);
-      phy.setTouhcingFloor(false);
+      phy.setTouchingFloor(false);
     }
   }
 
@@ -42,7 +42,7 @@ class CreatureBoundingBoxComponent extends BoundingBoxComponent {
     //
     if (other.position.y + TILE_SIZE >= gameObject.position.y && phy.isTouchingFloor() == false ) {
       phy.setGroundY(other.position.y);
-      phy.setTouhcingFloor(true);
+      phy.setTouchingFloor(true);
     }
 
     // If hit side of something, reversedirection

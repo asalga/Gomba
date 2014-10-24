@@ -14,20 +14,19 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
   void onCollisionExit(GameObject other) {
     super.onCollisionExit(other);
+    dprintln("OnCollisionExit() [" + other.id + ", " +  gameObject.id + "]");
 
     if (colliders.isEmpty()) {
       MarioControllerComponent mario = (MarioControllerComponent)gameObject.getComponent("MarioControllerComponent");
       if(mario.getJumpState() == false){
         mario.fall();
       }
-      else{
-        dprintln("On Collisionexit()");
-      }
     }
   }
   
   void onCollisionEnter(GameObject other) {
     super.onCollisionEnter(other);
+    dprintln("OnCollisionEnter() [" + other.id + ", " +  gameObject.id + "]");
 
     if(other.name == "coin"){
       soundManager.playSound("coin_pickup");
@@ -70,11 +69,12 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
        // LANDING but only if player was actually in the air
       if (gameObject.position.y > other.position.y && phy.isTouchingFloor() == false ) {
-        
+        dprintln("BBY - Landing");
+
         phy.landed();
 
         phy.setGroundY(other.position.y);
-        phy.setTouhcingFloor(true);
+        phy.setTouchingFloor(true);
 
         mario._isJumping = false;
       }

@@ -102,17 +102,20 @@ class MarioControllerComponent extends Component {
           soundManager.playSound("jump");
           animation.play("jump");
         }
-
         return;
       }
     }
 
+    if(canJump() == false){
+      println("MCC - canJump() returns false");
+    }
+
     // Add check for when touching top of structure
     if (canJump() && _isJumping == false) {
-      dprintln("jump()");
+      dprintln("MCC - jump()");
 
-      physics.setTouhcingFloor(false);
-      physics.applyForce(0, jumpForce);
+      physics.setTouchingFloor(false);
+      physics.applyJumpForce(jumpForce);
       soundManager.playSound("jump");
       animation.play("jump");
       _isJumping = true;
@@ -160,18 +163,21 @@ class MarioControllerComponent extends Component {
   }
 
   void fall(){
+    dprintln("MCC - fall()");
+
     PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    dprintln("fall()");
 
     phy.setGroundY(TILE_SIZE);
-    phy.setTouhcingFloor(false);
+    phy.setTouchingFloor(false);
     phy.velocity.y = 0;
+
     animation.play("jump");
   }
 
   void hitStructureY(GameObject structure){
     // LANDED ON TOP
     if(gameObject.position.y > structure.position.y){
+      dprintln("Landed on top");
       _isJumping = false;
     }
     // PUNCHED

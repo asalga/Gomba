@@ -59,7 +59,7 @@ class PhysicsComponent extends Component {
     return _isTouchingFloor;
   }
 
-  void setTouhcingFloor(boolean b) {
+  void setTouchingFloor(boolean b) {
     _isTouchingFloor = b;
   }
 
@@ -70,6 +70,7 @@ class PhysicsComponent extends Component {
 
   void update(float dt) {
 
+    // if the player is in the air, we apply gravity
     if (isTouchingFloor() == false) {
       velocity.y += gravity.y * dt;
     }
@@ -136,7 +137,7 @@ class PhysicsComponent extends Component {
   }
 
   void landed(){
-    dprintln("landed");
+    dprintln("PCC - landed()");
     position.y = groundY + boundingBox.h;
     _isTouchingFloor = true;
     velocity.y = 0;
@@ -166,12 +167,6 @@ class PhysicsComponent extends Component {
     maxXSpeed = m;
   }
 
-  void applyForce(float x, float y) {
-    acceleration.x += x;
-    acceleration.y += y;
-    checkIfGrounded();
-  }
-
   void checkIfGrounded() {
     if (acceleration.y != 0) {
       _isTouchingFloor = false;
@@ -179,7 +174,17 @@ class PhysicsComponent extends Component {
   }
 
   void applyForce(PVector force) {
-    acceleration.add(force);
+    applyForce(force.x, force.y);
+  }
+
+  void applyJumpForce(float y) {
+    velocity.y = 0;
+    applyForce(0, y);
+  }
+
+  void applyForce(float x, float y) {
+    acceleration.x += x;
+    acceleration.y += y;
     checkIfGrounded();
   }
 
