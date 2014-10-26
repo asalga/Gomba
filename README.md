@@ -21,8 +21,8 @@ Alternatively, you can just play here: [asalga.github.io/Gomba](http://asalga.gi
 Blog Posts
 ----------
 
-*[0.10 Release](http://asalga.wordpress.com/2014/09/20/gomba-0-1/)
-*[0.15 Release](http://asalga.wordpress.com/2014/10/25/gomba-0-15/)
+* [0.10 Release](http://asalga.wordpress.com/2014/09/20/gomba-0-1/)
+* [0.15 Release](http://asalga.wordpress.com/2014/10/25/gomba-0-15/)
 
 Resources
 ---------
