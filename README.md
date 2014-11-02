@@ -26,7 +26,7 @@ Blog Posts
 
 Resources
 ---------
-http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/
-http://www.hobbygamedev.com/int/platformer-game-source-in-processing/
-http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
-http://www.learn-cocos2d.com/2013/08/physics-engine-platformer-terrible-idea/
+* http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/
+* http://www.hobbygamedev.com/int/platformer-game-source-in-processing/
+* http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
+* http://www.learn-cocos2d.com/2013/08/physics-engine-platformer-terrible-idea/
