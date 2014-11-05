@@ -1,6 +1,6 @@
-////////////////////////
-// WrapAroundComponent
-////////////////////////
+/////////////////////////
+// BoundingBoxComponent
+/////////////////////////
 class BoundingBoxComponent extends Component {
 
   float x, y, w, h;
@@ -8,6 +8,7 @@ class BoundingBoxComponent extends Component {
   int mask;
   int type;
   HashMap<String, GameObject> colliders;
+  boolean collidable;
 
   BoundingBoxComponent() {
     super();
@@ -17,6 +18,7 @@ class BoundingBoxComponent extends Component {
     xOffest = yOffset = 0;
     mask = 0;
     colliders = new HashMap<String, GameObject>();
+    collidable = true;
   }
 
   void awake() {
@@ -46,7 +48,14 @@ class BoundingBoxComponent extends Component {
       pushStyle();
       strokeWeight(1);
       noFill();
-      stroke(255, 0, 0);
+      
+      if(isCollisable()){
+        stroke(255, 0, 0);
+      }
+      else{
+       stroke(255, 255, 255); 
+      }
+
       rect(x, -y + yOffset*2, w, h);
       popStyle();
     }
@@ -57,6 +66,14 @@ class BoundingBoxComponent extends Component {
   }
 
   void onCollision(GameObject other) {
+  }
+
+  void setEnableCollisions(boolean b){
+    collidable = b;
+  }
+
+  boolean isCollisable(){
+    return collidable;
   }
 
   void onCollisionEnter(GameObject other) {

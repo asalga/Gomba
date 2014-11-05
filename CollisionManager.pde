@@ -99,6 +99,10 @@ class CollisionManager {
               continue;
             }
 
+            if(bb1.isCollisable() == false || bb2.isCollisable() == false){
+              continue;
+            }
+
             // Check the masks
             if ((bb1.type & bb2.mask) == 0) {
               numCollisionTestsSkipped++;

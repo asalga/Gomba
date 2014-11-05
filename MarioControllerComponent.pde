@@ -3,12 +3,14 @@
 //////////////////////////
 class MarioControllerComponent extends Component {
 
-  final float walkForce = 20; //550
-  final float jumpForce = 650; //350
-  //BoundingBoxComponent boundingBox;
+  final float walkForce = 20;
+  final float jumpForce = 650;
 
   PhysicsComponent physics;
   AnimationComponent animation;
+  float jumpTimer = 0;
+
+  BoundingBoxComponent boundingBox;
 
   boolean canWalk;
 
@@ -33,11 +35,21 @@ class MarioControllerComponent extends Component {
     if(physics != null){
       physics.setHasFriction(true);
     }
+
+    boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
   }
 
   void update(float dt) {
     // TODO: fix
     super.update(dt);
+
+    jumpTimer += dt;
+
+    // We want to re-enable the collider, but only after it left the
+    // possibility of touching any other colliders
+    if(jumpTimer > 0.04){
+      boundingBox.setEnableCollisions(true);
+    }
 
     _isInvinsible = Keyboard.isKeyDown(KEY_I);
 
@@ -70,25 +82,36 @@ class MarioControllerComponent extends Component {
   }
 
   void idle() {
-    animation.play("idle");
+    if(animation != null){
+      animation.play("idle");
+    }
   }
 
   void walkRight() {
     physics.applyForce(walkForce, 0);
-    animation.setFlipX(false);
-    animation.play("walk");
+
+    if(animation != null){
+      animation.setFlipX(false);
+      animation.play("walk");
+    }
   }
 
   void walkLeft() {
     physics.applyForce(-walkForce, 0);
-    animation.setFlipX(true);
-    animation.play("walk");
+
+    if(animation != null){
+      animation.setFlipX(true);
+      animation.play("walk");
+    }
   }
 
   void jump() {
     // If the player is told to jump but they already are touching
     // a structure at the top, ignore the call.
     BoundingBoxComponent boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+    boundingBox.setEnableCollisions(false);
+    jumpTimer = 0.0;
+
     HashMap<String, GameObject> colliders = boundingBox.colliders;
     for(String key : colliders.keySet()){
       GameObject go = colliders.get(key);
@@ -100,7 +123,10 @@ class MarioControllerComponent extends Component {
           controller.hit(gameObject);
 
           soundManager.playSound("jump");
-          animation.play("jump");
+
+          if(animation != null){
+            animation.play("jump");
+          }
         }
         return;
       }
@@ -117,7 +143,11 @@ class MarioControllerComponent extends Component {
       physics.setTouchingFloor(false);
       physics.applyJumpForce(jumpForce);
       soundManager.playSound("jump");
-      animation.play("jump");
+      
+      if(animation!=null){
+        animation.play("jump");
+      }
+      
       _isJumping = true;
 
       // assume we'll land on the floor.
@@ -136,7 +166,7 @@ class MarioControllerComponent extends Component {
 
   // Not moving in either x or y direction
   boolean isIdle() {
-    return  Keyboard.isKeyDown(KEY_LEFT) == false &&
+    return Keyboard.isKeyDown(KEY_LEFT) == false &&
       Keyboard.isKeyDown(KEY_RIGHT) == false &&
       canJump();
   }
@@ -171,24 +201,18 @@ class MarioControllerComponent extends Component {
     phy.setTouchingFloor(false);
     phy.velocity.y = 0;
 
-    animation.play("jump");
+    if(animation != null){
+      animation.play("jump");
+    }
   }
 
   void hitStructureY(GameObject structure){
-    // LANDED ON TOP
-    if(gameObject.position.y > structure.position.y){
-      dprintln("Landed on top");
-      _isJumping = false;
-    }
-    // PUNCHED
-    else{
-      if(getJumpState()){
-        dprintln("Punched strucure");
-        physics.setVelocityY(0);
+    if(getJumpState()){
+      dprintln("Punched strucure");
+      physics.setVelocityY(0);
 
-        StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
-        controller.hit(gameObject);
-      }
+      StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
+      controller.hit(gameObject);
     }
   }
 
