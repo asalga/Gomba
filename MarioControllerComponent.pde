@@ -16,7 +16,6 @@ class MarioControllerComponent extends Component {
 
   boolean _isJumping;
   boolean _isIdle;
-  boolean isRunning;
   boolean _isInvinsible;
 
   MarioControllerComponent() {
@@ -24,7 +23,6 @@ class MarioControllerComponent extends Component {
     componentName = "MarioControllerComponent";
     _isJumping = false;
     _isIdle = true;
-    isRunning = false;
     _isInvinsible = false;
   }
 

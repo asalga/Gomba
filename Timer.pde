@@ -83,7 +83,7 @@ public class Timer {
   }
 
   /*
-  * Calculates how many seconds passed since the last call to this method.
+   * Calculates how many seconds passed since the last call to this method.
    *
    */
   public void tick() {
