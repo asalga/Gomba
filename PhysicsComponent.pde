@@ -83,8 +83,8 @@ class PhysicsComponent extends Component {
     if (velocity.x > maxXSpeed) {
       velocity.x = maxXSpeed;
     }
-    else if (velocity.x < 0.001) {
-      //velocity.x = 0;
+    else if(velocity.x < -maxXSpeed) {
+      velocity.x = -maxXSpeed;
     }
 
     // TODO: fix
