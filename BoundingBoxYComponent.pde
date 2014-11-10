@@ -63,7 +63,6 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
     // STRUCTURE
     else if(other.hasTag("structure")){
-      mario.hitStructureY(other);
 
       PhysicsComponent phy = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
 
@@ -78,6 +77,9 @@ class BoundingBoxYComponent extends BoundingBoxComponent {
 
         mario._isJumping = false;
       }
+      else{
+        mario.hitStructureY(other);
+      }
     }
-  } 
+  }
 }

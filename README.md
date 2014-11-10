@@ -21,12 +21,12 @@ Alternatively, you can just play here: [asalga.github.io/Gomba](http://asalga.gi
 Blog Posts
 ----------
 
-[0.1 Release](http://asalga.wordpress.com/2014/09/20/gomba-0-1/)
-
+* [0.10 Release](http://asalga.wordpress.com/2014/09/20/gomba-0-1/)
+* [0.15 Release](http://asalga.wordpress.com/2014/10/25/gomba-0-15/)
 
 Resources
 ---------
-http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/
-http://www.hobbygamedev.com/int/platformer-game-source-in-processing/
-http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
-http://www.learn-cocos2d.com/2013/08/physics-engine-platformer-terrible-idea/
+* http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/
+* http://www.hobbygamedev.com/int/platformer-game-source-in-processing/
+* http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
+* http://www.learn-cocos2d.com/2013/08/physics-engine-platformer-terrible-idea/

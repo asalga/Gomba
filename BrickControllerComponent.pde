@@ -3,7 +3,12 @@
 /////////////////////////////
 class BrickControllerComponent extends StructureControllerComponent{
 	
-	float y;
+	// Properties
+	float heightBounce;
+	float speed;
+
+
+	float yPos;
 	boolean bouncing;
 	float original;
 	BoundingBoxComponent bounds;
@@ -11,8 +16,12 @@ class BrickControllerComponent extends StructureControllerComponent{
 
 	BrickControllerComponent(){
 		super();
-		y = 0;
+		yPos = 0;
 		bouncing = false;
+
+		// Properties
+		heightBounce = 8;
+		speed = 10;
 	}
 
 	void awake(){
@@ -43,19 +52,16 @@ class BrickControllerComponent extends StructureControllerComponent{
 
 	void update(float dt){
 		if(bouncing == true){
-			y += dt * 15.0;
+			yPos += dt * speed;
 
 			if(animation != null){
-				// TODO: fix
-				float ytemp = (15 * sin(y));
-				animation.setPosition(0, ytemp);
+				animation.setPosition(0, heightBounce * sin(yPos));
 			}
 		}
-		if(y >= PI){
-			y = 0;
+		if(yPos >= PI){
+			yPos = 0;
 			bouncing = false;
 			animation.setPosition(0, 0);
 		}
 	}
 }
-
