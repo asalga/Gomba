@@ -3,6 +3,7 @@
 //////////////////////////////
 class GoombaControllerComponent extends SpriteControllerComponent {
 
+  BoundingBoxComponent boundsComponent;
   AnimationComponent animationComponent;
   Timer deathTimer;
 
@@ -16,6 +17,7 @@ class GoombaControllerComponent extends SpriteControllerComponent {
   void awake() {
     super.awake();
     animationComponent = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+    boundsComponent = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
   }
 
   void kick(){
@@ -30,9 +32,7 @@ class GoombaControllerComponent extends SpriteControllerComponent {
     PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.stop();
 
-    //gameObject.velocity.set(0,0);
-    //gameObject.removeComponent("PhysicsComponent");
-    //gameObject.removeComponent("BoundingBoxComponent");
+    boundsComponent.setEnableCollisions(false);
   }
 
   void update(float dt) {
@@ -47,5 +47,4 @@ class GoombaControllerComponent extends SpriteControllerComponent {
 
   void render() {
   }
-
 }
