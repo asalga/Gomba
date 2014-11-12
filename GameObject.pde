@@ -89,15 +89,6 @@ class GameObject {
     }
   }
 
-  boolean haTag(String tag) {
-    for (int i = 0; i < tags.size(); i++) {
-      if (tags.get(i) == tag) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   PVector getPosition() {
     return position;
   }

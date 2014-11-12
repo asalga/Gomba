@@ -56,8 +56,6 @@ class AnimationComponent extends Component {
         scale(1, -1);
       }
 
-      
-
       image(currentClip.getCurrFrame(), 0, 0);
       popMatrix();
     }

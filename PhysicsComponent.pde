@@ -3,6 +3,8 @@
 /////////////////////
 class PhysicsComponent extends Component {
 
+  final int GRAVITY_Y = -1500;
+
   // Purpose of this components is to take care of low-level physics things.
   PVector gravity;
   PVector position;
@@ -32,7 +34,7 @@ class PhysicsComponent extends Component {
     acceleration = new PVector();
 
     drag = new PVector();
-    gravity = new PVector(0, -1500);
+    gravity = new PVector(0, GRAVITY_Y);
 
     maxXSpeed = 1;
     mass = 1;
@@ -76,15 +78,13 @@ class PhysicsComponent extends Component {
     }
 
     velocity.add(acceleration);
-    //velocity.x += acceleration.x * dt;
-    //velocity.y += acceleration.y * 1;
 
     // max running speed
     if (velocity.x > maxXSpeed) {
       velocity.x = maxXSpeed;
     }
-    else if (velocity.x < 0.001) {
-      //velocity.x = 0;
+    else if(velocity.x < -maxXSpeed) {
+      velocity.x = -maxXSpeed;
     }
 
     // TODO: fix

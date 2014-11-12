@@ -51,8 +51,10 @@ class Scene {
     //generateBrickTiles(5);
     //generateBrickTiles(6);
     generateStaircase();
+    generatePlatform();
     generateGoombas();
-    
+    generateCoinBox();
+
     generateSpineys();
     generateClouds();
     awake();
@@ -231,13 +233,24 @@ class Scene {
         collisionManager.add(brick);
       }
     }
+  }
 
-    for(int i = 0; i < 10; i++){
-      GameObject brick1 = gameObjectFactory.create("brick");
-      brick1.setPosition(i *TILE_SIZE, TILE_SIZE * 4);
-      gameObjects.add(brick1);
-      collisionManager.add(brick1);
-    }      
+  void generatePlatform() {
+    GameObject brick;
+    for(int i = 0; i < 3; ++i) {
+      brick = gameObjectFactory.create("brick");
+      brick.setPosition(i * TILE_SIZE, TILE_SIZE * 4);
+      gameObjects.add(brick);
+      collisionManager.add(brick);
+    }
+  }
+
+  void generateCoinBox(){
+    GameObject coinBox;
+    coinBox = gameObjectFactory.create("coinbox");
+    coinBox.setPosition(TILE_SIZE * 3, TILE_SIZE * 4);
+    gameObjects.add(coinBox);
+    collisionManager.add(coinBox);
   }
 
   void generateBrickTiles(int y) {

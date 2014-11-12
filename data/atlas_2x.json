@@ -97,8 +97,16 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
+	"filename": "misc/missing_image.png",
+	"frame": {"x":165,"y":33,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
 	"filename": "props/clouds/cloud1.png",
-	"frame": {"x":165,"y":33,"w":64,"h":48},
+	"frame": {"x":0,"y":66,"w":64,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":48},
@@ -106,7 +114,7 @@
 },
 {
 	"filename": "props/clouds/cloud2.png",
-	"frame": {"x":0,"y":82,"w":96,"h":48},
+	"frame": {"x":65,"y":66,"w":96,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":48},
@@ -114,7 +122,7 @@
 },
 {
 	"filename": "props/clouds/cloud3.png",
-	"frame": {"x":97,"y":82,"w":128,"h":48},
+	"frame": {"x":0,"y":115,"w":128,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":48},
@@ -122,7 +130,7 @@
 },
 {
 	"filename": "props/coin/coin0.png",
-	"frame": {"x":0,"y":131,"w":32,"h":32},
+	"frame": {"x":129,"y":115,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -130,7 +138,7 @@
 },
 {
 	"filename": "props/coin/coin1.png",
-	"frame": {"x":33,"y":131,"w":32,"h":32},
+	"frame": {"x":162,"y":115,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -138,7 +146,7 @@
 },
 {
 	"filename": "props/coin/coin2.png",
-	"frame": {"x":66,"y":131,"w":32,"h":32},
+	"frame": {"x":195,"y":115,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -146,38 +154,6 @@
 },
 {
 	"filename": "props/coin/coin3.png",
-	"frame": {"x":99,"y":131,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32}
-},
-{
-	"filename": "props/coinbox/idle1.png",
-	"frame": {"x":132,"y":131,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32}
-},
-{
-	"filename": "props/coinbox/idle2.png",
-	"frame": {"x":165,"y":131,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32}
-},
-{
-	"filename": "props/coinbox/idle3.png",
-	"frame": {"x":198,"y":131,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32}
-},
-{
-	"filename": "props/mushrooms/murshroom_red.png",
 	"frame": {"x":0,"y":164,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -185,7 +161,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "props/mushrooms/mushroom_green.png",
+	"filename": "props/coinbox/dead.png",
 	"frame": {"x":33,"y":164,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -193,8 +169,48 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
+	"filename": "props/coinbox/idle1.png",
+	"frame": {"x":66,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "props/coinbox/idle2.png",
+	"frame": {"x":99,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "props/coinbox/idle3.png",
+	"frame": {"x":132,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "props/mushrooms/murshroom_red.png",
+	"frame": {"x":165,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "props/mushrooms/mushroom_green.png",
+	"frame": {"x":198,"y":164,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
 	"filename": "props/pipe/pipe_shaft.png",
-	"frame": {"x":66,"y":164,"w":64,"h":8},
+	"frame": {"x":0,"y":197,"w":64,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":8},
@@ -202,7 +218,7 @@
 },
 {
 	"filename": "props/pipe/pipe_top.png",
-	"frame": {"x":131,"y":164,"w":64,"h":32},
+	"frame": {"x":65,"y":197,"w":64,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
@@ -210,7 +226,7 @@
 },
 {
 	"filename": "props/structure/bricks.png",
-	"frame": {"x":196,"y":164,"w":32,"h":32},
+	"frame": {"x":130,"y":197,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -218,7 +234,7 @@
 },
 {
 	"filename": "props/structure/ground.png",
-	"frame": {"x":0,"y":197,"w":32,"h":32},
+	"frame": {"x":163,"y":197,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -226,7 +242,7 @@
 },
 {
 	"filename": "props/structure/tile.png",
-	"frame": {"x":33,"y":197,"w":32,"h":32},
+	"frame": {"x":196,"y":197,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -239,6 +255,6 @@
 	"format": "RGBA8888",
 	"size": {"w":256,"h":256},
 	"scale": "2",
-	"smartupdate": "$TexturePacker:SmartUpdate:ff75329f9fa262b5804e011d54fbf0a2$"
+	"smartupdate": "$TexturePacker:SmartUpdate:9b4a40b8ea97bf7680a434a63e2a9563$"
 }
 }

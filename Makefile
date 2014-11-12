@@ -4,7 +4,7 @@
 build: minify
 
 minify:
-	cat Gomba.pde                  \
+	cat Gomba.pde                       \
 		AnimationClip.pde               \
 		AnimationComponent.pde          \
 		ArtManager.pde                  \
@@ -16,6 +16,7 @@ minify:
 		BoundingBoxXComponent.pde       \
 		BoundingBoxYComponent.pde       \
 		CameraComponent.pde             \
+		CoinBoxControllerComponent.pde  \
 		CollisionManager.pde           	\
 		Component.pde                  	\
 		CreatureBoundingBoxComponent.pde\
@@ -29,6 +30,7 @@ minify:
 		PhysicsComponent.pde            \
 		Scene.pde                       \
 		SpriteControllerComponent.pde   \
+		StructureBounceComponent.pde    \
 		StructureControllerComponent.pde\
 		Timer.pde                       \
 		Utils.js                        \

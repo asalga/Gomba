@@ -16,8 +16,6 @@ void dprintln(String s){
   }
 }
 
-
-
 // ArtManager needs this in order to determine which
 // parser to use.
 String getFileExtension(String path) {
@@ -43,8 +41,7 @@ public static class Utils {
 // Determine if for sure one box isn't touching the other, then negate that.
 boolean testCollisionWithTouch(BoundingBoxComponent a, BoundingBoxComponent b) {
   return !( (a.x       > b.x + b.w) || 
-    (a.x + a.w < b.x )      ||
-    (a.y       > b.y + b.h) ||
-    (a.y + a.h < b.y));
+            (a.x + a.w < b.x )      ||
+            (a.y       > b.y + b.h) ||
+            (a.y + a.h < b.y));
 }
-
