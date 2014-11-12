@@ -33,9 +33,11 @@ class CoinBoxControllerComponent extends StructureControllerComponent{
 
     	if(numCoins == 0) {
     		aniComp.play("dead");
+    		soundManager.playSound("bump");
     	}
     	else {
     		bounceComponent.bounce();
+    		soundManager.playSound("coin_pickup");
     	}
 	}
 
