@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
-<!-- $TexturePacker:SmartUpdate:64faed4325aec479f0037f8ad909f1c1$ -->
+<!-- $TexturePacker:SmartUpdate:efb1905ae1fe6db01e2809342f7f6b94$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -26,21 +26,23 @@ r => 'y' only set if sprite is rotated
     <sprite n="chars/spiney/fall1.png" x="66" y="33" w="32" h="32"/>
     <sprite n="chars/spiney/walk0.png" x="99" y="33" w="32" h="32"/>
     <sprite n="chars/spiney/walk1.png" x="132" y="33" w="32" h="32"/>
-    <sprite n="props/clouds/cloud1.png" x="165" y="33" w="64" h="48"/>
-    <sprite n="props/clouds/cloud2.png" x="0" y="82" w="96" h="48"/>
-    <sprite n="props/clouds/cloud3.png" x="97" y="82" w="128" h="48"/>
-    <sprite n="props/coin/coin0.png" x="0" y="131" w="32" h="32"/>
-    <sprite n="props/coin/coin1.png" x="33" y="131" w="32" h="32"/>
-    <sprite n="props/coin/coin2.png" x="66" y="131" w="32" h="32"/>
-    <sprite n="props/coin/coin3.png" x="99" y="131" w="32" h="32"/>
-    <sprite n="props/coinbox/idle1.png" x="132" y="131" w="32" h="32"/>
-    <sprite n="props/coinbox/idle2.png" x="165" y="131" w="32" h="32"/>
-    <sprite n="props/coinbox/idle3.png" x="198" y="131" w="32" h="32"/>
-    <sprite n="props/mushrooms/murshroom_red.png" x="0" y="164" w="32" h="32"/>
-    <sprite n="props/mushrooms/mushroom_green.png" x="33" y="164" w="32" h="32"/>
-    <sprite n="props/pipe/pipe_shaft.png" x="66" y="164" w="64" h="8"/>
-    <sprite n="props/pipe/pipe_top.png" x="131" y="164" w="64" h="32"/>
-    <sprite n="props/structure/bricks.png" x="196" y="164" w="32" h="32"/>
-    <sprite n="props/structure/ground.png" x="0" y="197" w="32" h="32"/>
-    <sprite n="props/structure/tile.png" x="33" y="197" w="32" h="32"/>
+    <sprite n="misc/missing_image.png" x="165" y="33" w="32" h="32"/>
+    <sprite n="props/clouds/cloud1.png" x="0" y="66" w="64" h="48"/>
+    <sprite n="props/clouds/cloud2.png" x="65" y="66" w="96" h="48"/>
+    <sprite n="props/clouds/cloud3.png" x="0" y="115" w="128" h="48"/>
+    <sprite n="props/coin/coin0.png" x="129" y="115" w="32" h="32"/>
+    <sprite n="props/coin/coin1.png" x="162" y="115" w="32" h="32"/>
+    <sprite n="props/coin/coin2.png" x="195" y="115" w="32" h="32"/>
+    <sprite n="props/coin/coin3.png" x="0" y="164" w="32" h="32"/>
+    <sprite n="props/coinbox/dead.png" x="33" y="164" w="32" h="32"/>
+    <sprite n="props/coinbox/idle1.png" x="66" y="164" w="32" h="32"/>
+    <sprite n="props/coinbox/idle2.png" x="99" y="164" w="32" h="32"/>
+    <sprite n="props/coinbox/idle3.png" x="132" y="164" w="32" h="32"/>
+    <sprite n="props/mushrooms/murshroom_red.png" x="165" y="164" w="32" h="32"/>
+    <sprite n="props/mushrooms/mushroom_green.png" x="198" y="164" w="32" h="32"/>
+    <sprite n="props/pipe/pipe_shaft.png" x="0" y="197" w="64" h="8"/>
+    <sprite n="props/pipe/pipe_top.png" x="65" y="197" w="64" h="32"/>
+    <sprite n="props/structure/bricks.png" x="130" y="197" w="32" h="32"/>
+    <sprite n="props/structure/ground.png" x="163" y="197" w="32" h="32"/>
+    <sprite n="props/structure/tile.png" x="196" y="197" w="32" h="32"/>
 </TextureAtlas>

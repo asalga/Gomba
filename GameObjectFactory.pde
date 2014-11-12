@@ -180,6 +180,11 @@ class GameObjectFactory {
       BrickControllerComponent controller = new BrickControllerComponent();
       brick.addComponent(controller);
 
+      StructureBounceComponent bounceComponent = new StructureBounceComponent();
+      // set props...
+      brick.addComponent(bounceComponent);
+
+
       return brick;
     }
 
@@ -235,31 +240,44 @@ class GameObjectFactory {
       return goomba;
     }
 
+    //
+    // COIN BOX
+    //
     else if(id == "coinbox"){
       GameObject coinBox = new GameObject();
       coinBox.addTag("coinbox");
+      coinBox.addTag("structure");
 
       AnimationComponent aniComp = new AnimationComponent();
       coinBox.addComponent(aniComp);
 
       AnimationClip dead = new AnimationClip();
       dead.addFrame("props/coinbox/dead.png");
+      aniComp.addClip("dead", dead);
 
       AnimationClip idle = new AnimationClip();
+      idle.setFrameTime(0.5);
       idle.addFrame("props/coinbox/idle1.png");
       idle.addFrame("props/coinbox/idle2.png");
       idle.addFrame("props/coinbox/idle3.png");
+      idle.addFrame("props/coinbox/idle2.png");
+      aniComp.addClip("idle", idle);
+      aniComp.play("idle");
 
-      /*CoinBoxBoundingBoxComponent boxComp = new CoinBoxBoundingBoxComponent();
+      BoundingBoxComponent boxComp = new BoundingBoxComponent();
       boxComp.w = TILE_SIZE;
       boxComp.h = TILE_SIZE;
-      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
       boxComp.type = CollisionManager.STRUCTURE;
-      boxComp.addComponent(boxComp);
+      boxComp.mask = CollisionManager.PLAYER | CollisionManager.ENEMY;
+      coinBox.addComponent(boxComp);
 
       CoinBoxControllerComponent controller = new CoinBoxControllerComponent();
-      controller.setNumCoins(10);*/
-      // Add list?
+      coinBox.addComponent(controller);
+      // Add list of objects inside coinbox?
+
+      StructureBounceComponent bounceComponent = new StructureBounceComponent();
+      // set props...
+      coinBox.addComponent(bounceComponent);
 
       return coinBox;
     }
