@@ -177,7 +177,7 @@ class Scene {
       for (int x = 0; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
           GameObject coin = gameObjectFactory.create("coin");
-          coin.position = new PVector((96) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
+          coin.position = new PVector((TILE_SIZE * 8) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
           gameObjects.add(coin);
           collisionManager.add(coin);
         }

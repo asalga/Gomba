@@ -27,17 +27,23 @@ class CoinBoxControllerComponent extends StructureControllerComponent{
 	void hit(GameObject other) {
     	super.hit(other);
 
-    	if(numCoins > 0){
-    		numCoins--;
-    	}
-
-    	if(numCoins == 0) {
-    		aniComp.play("dead");
-    		soundManager.playSound("bump");
-    	}
-    	else {
+		if(numCoins > 1) {
     		bounceComponent.bounce();
     		soundManager.playSound("coin_pickup");
+		}
+
+		else if(numCoins == 1){
+			aniComp.play("dead");
+			bounceComponent.bounce();
+    		soundManager.playSound("coin_pickup");
+
+		}
+		else{
+			soundManager.playSound("bump");
+		}
+
+    	if(numCoins > 0){
+    		numCoins--;
     	}
 	}
 

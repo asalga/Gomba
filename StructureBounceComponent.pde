@@ -21,7 +21,7 @@ class StructureBounceComponent extends StructureControllerComponent{
 		bouncing = false;
 
 		// Properties
-		heightBounce = 8;
+		heightBounce = 16;
 		speed = 10;
 	}
 
