@@ -9,6 +9,7 @@ class BoundingBoxXComponent extends BoundingBoxComponent {
   }
 
   void onCollision(GameObject other) {
+    super.onCollision(other);
   }
 
   void onCollisionExit(GameObject other) {

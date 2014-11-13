@@ -3,8 +3,12 @@
 ////////////////////////
 class WrapAroundComponent extends Component {
 
-  PVector position;
-  float extraBuffer;
+  // Properties
+  public PVector position;
+  public float extraBuffer;
+  //
+  
+
   BoundingBoxComponent bounds;
 
   WrapAroundComponent() {

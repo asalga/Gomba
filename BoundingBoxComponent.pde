@@ -3,12 +3,15 @@
 /////////////////////////
 class BoundingBoxComponent extends Component {
 
-  float x, y, w, h;
-  float xOffest, yOffset;
-  int mask;
-  int type;
-  HashMap<String, GameObject> colliders;
+  // Properties
+  public float x, y, w, h;
+  public float xOffest, yOffset;
+  public int mask;
+  public int type;
+  //
+
   boolean collidable;
+  HashMap<String, GameObject> colliders;
 
   BoundingBoxComponent() {
     super();

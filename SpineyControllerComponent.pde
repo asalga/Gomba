@@ -11,11 +11,10 @@ class SpineyControllerComponent extends SpriteControllerComponent {
 
   void awake() {
     super.awake();
-    //animationComponent = (AnimationComponent)gameObject.getComponent("AnimationComponent");
   }
 
   void squash() {
-    // kill player
+    // kill player?
   }
 
   void update(float dt) {

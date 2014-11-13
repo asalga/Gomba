@@ -4,8 +4,9 @@
 class StructureBounceComponent extends StructureControllerComponent{
 	
 	// Properties
-	float heightBounce;
-	float speed;
+	public float bounceHeight;
+	public float bounceSpeed;
+	//
 
 
 	float yPos;
@@ -21,8 +22,8 @@ class StructureBounceComponent extends StructureControllerComponent{
 		bouncing = false;
 
 		// Properties
-		heightBounce = 16;
-		speed = 10;
+		bounceHeight = 32;
+		bounceSpeed = 1;
 	}
 
 	void awake(){
@@ -56,10 +57,10 @@ class StructureBounceComponent extends StructureControllerComponent{
 
 	void update(float dt){
 		if(bouncing == true){
-			yPos += dt * speed;
+			yPos += dt * bounceSpeed;
 
 			if(animation != null){
-				animation.setPosition(0, heightBounce * sin(yPos));
+				animation.setPosition(0, bounceHeight * sin(yPos));
 			}
 		}
 		if(yPos >= PI){

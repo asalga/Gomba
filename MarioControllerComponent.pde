@@ -8,9 +8,9 @@ class MarioControllerComponent extends Component {
 
   PhysicsComponent physics;
   AnimationComponent animation;
-  float jumpTimer = 0;
-
   BoundingBoxComponent boundingBox;
+
+  float jumpTimer;
 
   boolean canWalk;
 
@@ -24,6 +24,8 @@ class MarioControllerComponent extends Component {
     _isJumping = false;
     _isIdle = true;
     _isInvinsible = false;
+
+    jumpTimer = 0;
   }
 
   void awake() {

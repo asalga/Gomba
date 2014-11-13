@@ -3,13 +3,14 @@
 ///////////////////////////////
 class CoinBoxControllerComponent extends StructureControllerComponent{
 
+	// Properties
+	public int numCoins;
+	//
+
 	BoundingBoxComponent bounds;
 	AnimationComponent animation;
 	StructureBounceComponent bounceComponent;
 	AnimationComponent aniComp;
-
-	// Properties
-	int numCoins;
 
 	CoinBoxControllerComponent(){
 		super();
