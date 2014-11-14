@@ -124,9 +124,10 @@ class Scene {
 
     debug.addString("");
     debug.addString("KEYS");
-    debug.addString("D - Debugging toggle");
-    debug.addString("I - Invincibility toggle");
-    debug.addString("R - Restart scene");
+    debug.addString("--------");
+    debug.addString(" D - Debugging toggle");
+    debug.addString(" I - Invincibility toggle");
+    debug.addString(" R - Restart scene");
     debug.addString("");
 
     debug.addString("Dimensions: [" + width + "," + height + "]");
