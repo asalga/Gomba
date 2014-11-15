@@ -22,6 +22,7 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
+
     collisionManager = new CollisionManager();
 
     collisionsEnabled = true;
@@ -58,6 +59,8 @@ class Scene {
     generateSpineys();
     generateClouds();
     awake();
+
+    player.position = new PVector( TILE_SIZE * 4, TILE_SIZE * 8);
   }
 
   Scene() {
@@ -76,6 +79,9 @@ class Scene {
     for (int i = 0; i < gameObjects.size(); i++) {
       gameObjects.get(i).awake();
     }
+    
+    PhysicsComponent physics = (PhysicsComponent)player.getComponent("PhysicsComponent");
+    physics.landed();
   }
 
   void keyPressed() {
@@ -117,6 +123,8 @@ class Scene {
     }
     collisionTimer.tick();
     collisionCheckTime = collisionTimer.getTotalTime() * 1000;
+     
+     //player.position = new PVector(TILE_SIZE * 0, TILE_SIZE * 4);
   }
 
   void render() {
@@ -183,7 +191,7 @@ class Scene {
   void generateCoins() {
     for (int numGroups = 0; numGroups < 5; numGroups++) {
       for (int x = 0; x < 3; x++) {
-        for (int y = 0; y < 3; y++) {
+        for (int y = 1; y < 2; y++) {
           GameObject coin = gameObjectFactory.create("coin");
           coin.position = new PVector((TILE_SIZE * 8) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
           gameObjects.add(coin);
@@ -194,9 +202,9 @@ class Scene {
   }
 
   void generateGoombas() {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 1; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(96 + i * (TILE_SIZE*10), 164 + i * (TILE_SIZE*10));
+      goomba.position = new PVector(i * (TILE_SIZE * 25), i + (TILE_SIZE * 8));
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }

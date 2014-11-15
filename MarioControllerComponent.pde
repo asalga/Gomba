@@ -66,7 +66,7 @@ class MarioControllerComponent extends Component {
       }
     }
 
-    if (Keyboard.isKeyDown(KEY_UP)) {
+    if (Keyboard.isKeyDown(KEY_UP) || Keyboard.isKeyDown(KEY_SPACE)) {
       if (canJump()) {
         jump();
       }
@@ -116,6 +116,8 @@ class MarioControllerComponent extends Component {
     for(String key : colliders.keySet()){
       GameObject go = colliders.get(key);
       BoundingBoxComponent bb = (BoundingBoxComponent)go.getComponent("BoundingBoxComponent");
+
+      // Getting a Null pointer exception here.....
       if(bb.y > boundingBox.y){
 
         StructureControllerComponent controller = (StructureControllerComponent)go.getComponent("StructureControllerComponent");
@@ -210,7 +212,6 @@ class MarioControllerComponent extends Component {
     if(getJumpState()){
       dprintln("Punched strucure");
       physics.setVelocityY(0);
-
       StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
       controller.hit(gameObject);
     }
@@ -223,6 +224,9 @@ class MarioControllerComponent extends Component {
   // player can only jump if they are touching the floor.
   // TODO: later add if touching platform
   boolean canJump() {
-    return physics.isTouchingFloor();
+    if(physics != null){
+      return physics.isTouchingFloor();  
+    }
+    return false;
   }
 }

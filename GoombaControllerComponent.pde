@@ -34,6 +34,8 @@ class GoombaControllerComponent extends SpriteControllerComponent {
     deathTimer = new Timer();
     alive = false;
 
+    soundManager.playSound("smb_stomp");
+
     PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.stop();
 
@@ -51,5 +53,6 @@ class GoombaControllerComponent extends SpriteControllerComponent {
   }
 
   void render() {
+    super.render();
   }
 }

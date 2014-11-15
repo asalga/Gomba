@@ -52,7 +52,7 @@ class BoundingBoxComponent extends Component {
       strokeWeight(1);
       noFill();
       
-      if(isCollisable()){
+      if(isCollidable()){
         stroke(255, 0, 0);
       }
       else{
@@ -75,7 +75,7 @@ class BoundingBoxComponent extends Component {
     collidable = b;
   }
 
-  boolean isCollisable(){
+  boolean isCollidable(){
     return collidable;
   }
 

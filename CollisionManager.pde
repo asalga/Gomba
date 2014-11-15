@@ -99,7 +99,7 @@ class CollisionManager {
               continue;
             }
 
-            if(bb1.isCollisable() == false || bb2.isCollisable() == false){
+            if(bb1.isCollidable() == false || bb2.isCollidable() == false){
               continue;
             }
 
