@@ -5,7 +5,7 @@ class PhysicsComponent extends Component {
 
   final int GRAVITY_Y = -1500;
 
-  // Purpose of this components is to take care of low-level physics things.
+  // Properties?
   PVector gravity;
   PVector position;
   PVector velocity;
@@ -14,6 +14,9 @@ class PhysicsComponent extends Component {
 
   float maxXSpeed;
   float mass;
+  //
+
+  // Purpose of this components is to take care of low-level physics things.
 
   boolean isDynamic;
   boolean atRest;
@@ -48,13 +51,12 @@ class PhysicsComponent extends Component {
 
   void awake() {
     super.awake();
-    // TODO: fix cast
+
     boundingBox = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
 
     if (boundingBox == null) {
       println("Could not find boundingBox component");
     }
-    landed();
   }
 
   boolean isTouchingFloor() {
@@ -71,6 +73,9 @@ class PhysicsComponent extends Component {
   }
 
   void update(float dt) {
+
+    position.x = gameObject.position.x;
+    position.y = gameObject.position.y;
 
     // if the player is in the air, we apply gravity
     if (isTouchingFloor() == false) {
@@ -96,10 +101,8 @@ class PhysicsComponent extends Component {
         velocity.x += drag.x;
       }
       else {
-        //if(velocity.x < 40){
         drag.set(-velocity.x*0.005, 0);      //applyForce(drag);
         velocity.x += drag.x;
-        //}
       }
     }
 
@@ -129,6 +132,7 @@ class PhysicsComponent extends Component {
         position.y = groundY + boundingBox.h;
       }
     }
+
     gameObject.position.set(position.x, position.y);
   }
 

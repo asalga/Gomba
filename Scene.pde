@@ -22,6 +22,7 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
+    player.position.set(TILE_SIZE * 0,  height);
 
     collisionManager = new CollisionManager();
 
@@ -54,14 +55,14 @@ class Scene {
     //generateBrickTiles(6);
     generateStaircase();
     generatePlatform();
-    generateGoombas();
     generateCoinBox();
 
+    generateGoombas();
     generateSpineys();
     
     awake();
 
-    player.position = new PVector( TILE_SIZE * 4, TILE_SIZE * 8);
+    
   }
 
   Scene() {
@@ -80,9 +81,6 @@ class Scene {
     for (int i = 0; i < gameObjects.size(); i++) {
       gameObjects.get(i).awake();
     }
-    
-    PhysicsComponent physics = (PhysicsComponent)player.getComponent("PhysicsComponent");
-    physics.landed();
   }
 
   void keyPressed() {
@@ -124,8 +122,6 @@ class Scene {
     }
     collisionTimer.tick();
     collisionCheckTime = collisionTimer.getTotalTime() * 1000;
-     
-     //player.position = new PVector(TILE_SIZE * 0, TILE_SIZE * 4);
   }
 
   void render() {
@@ -203,9 +199,9 @@ class Scene {
   }
 
   void generateGoombas() {
-    for (int i = 0; i < 8; i++) {
+    for (int i = 1; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(width + (i * TILE_SIZE) * 20, TILE_SIZE * 2);
+      goomba.position = new PVector(0 + (i * TILE_SIZE) * 10, TILE_SIZE * 20);
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }
@@ -257,7 +253,7 @@ class Scene {
     GameObject brick;
     for(int i = 0; i < 3; ++i) {
       brick = gameObjectFactory.create("brick");
-      brick.setPosition(i * TILE_SIZE, TILE_SIZE * 4);
+      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 2, TILE_SIZE * 4);
       gameObjects.add(brick);
       collisionManager.add(brick);
     }
@@ -266,7 +262,7 @@ class Scene {
   void generateCoinBox(){
     GameObject coinBox;
     coinBox = gameObjectFactory.create("coinbox");
-    coinBox.setPosition(TILE_SIZE * 3, TILE_SIZE * 4);
+    coinBox.setPosition(TILE_SIZE * 5, TILE_SIZE * 4);
     gameObjects.add(coinBox);
     collisionManager.add(coinBox);
   }

@@ -50,9 +50,5 @@ class CoinBoxControllerComponent extends StructureControllerComponent{
 
 	void update(float dt){
 		super.update(dt);
-
-		// TODO:
-		// We only want the image to change to dead once has finished
-		// the bounce animation....
 	}
 }
