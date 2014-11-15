@@ -3,6 +3,11 @@
 ////////////////////////////////
 class PatrolEnemyPhysicsComponent extends PhysicsComponent {
 
+  // Properties
+  // TODO: implement
+  public float pixelsPerSecond;
+  //
+
   PatrolEnemyPhysicsComponent() {
     super();
     componentName = "PhysicsComponent";

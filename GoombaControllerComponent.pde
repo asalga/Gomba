@@ -3,15 +3,20 @@
 //////////////////////////////
 class GoombaControllerComponent extends SpriteControllerComponent {
 
+  // Properties
+  public float delayBeforeRemoval;
+  //
+
   BoundingBoxComponent boundsComponent;
   AnimationComponent animationComponent;
   Timer deathTimer;
 
   GoombaControllerComponent() {
-    // TODO: fix
     super();
+    // TODO: fix
     componentName = "SpriteControllerComponent";
     deathTimer = null;
+    delayBeforeRemoval = 0;
   }
 
   void awake() {
@@ -29,6 +34,8 @@ class GoombaControllerComponent extends SpriteControllerComponent {
     deathTimer = new Timer();
     alive = false;
 
+    soundManager.playSound("smb_stomp");
+
     PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
     physics.stop();
 
@@ -39,12 +46,13 @@ class GoombaControllerComponent extends SpriteControllerComponent {
     super.update(dt);
     if(deathTimer != null){
       deathTimer.tick();
-      if(deathTimer.getTotalTime() > 0.5){
+      if(deathTimer.getTotalTime() >= delayBeforeRemoval){
         gameObject.slateForRemoval();
       }
     }
   }
 
   void render() {
+    super.render();
   }
 }

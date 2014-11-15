@@ -3,13 +3,14 @@
 ///////////////////////////////
 class CoinBoxControllerComponent extends StructureControllerComponent{
 
+	// Properties
+	public int numCoins;
+	//
+
 	BoundingBoxComponent bounds;
 	AnimationComponent animation;
 	StructureBounceComponent bounceComponent;
 	AnimationComponent aniComp;
-
-	// Properties
-	int numCoins;
 
 	CoinBoxControllerComponent(){
 		super();
@@ -27,23 +28,27 @@ class CoinBoxControllerComponent extends StructureControllerComponent{
 	void hit(GameObject other) {
     	super.hit(other);
 
+		if(numCoins > 1) {
+    		bounceComponent.bounce();
+    		soundManager.playSound("coin_pickup");
+		}
+
+		else if(numCoins == 1){
+			aniComp.play("dead");
+			bounceComponent.bounce();
+    		soundManager.playSound("coin_pickup");
+
+		}
+		else{
+			soundManager.playSound("bump");
+		}
+
     	if(numCoins > 0){
     		numCoins--;
-    	}
-
-    	if(numCoins == 0) {
-    		aniComp.play("dead");
-    	}
-    	else {
-    		bounceComponent.bounce();
     	}
 	}
 
 	void update(float dt){
 		super.update(dt);
-
-		// TODO:
-		// We only want the image to change to dead once has finished
-		// the bounce animation....
 	}
 }

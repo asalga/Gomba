@@ -45,6 +45,7 @@ void setup() {
   soundManager.addSound("coin_pickup", 7);
   soundManager.addSound("pause", 1);
   soundManager.addSound("bump", 1);
+  soundManager.addSound("smb_stomp", 1);
   // soundManager.setMute(true);
 
   debugOn = false;

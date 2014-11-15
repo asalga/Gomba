@@ -22,6 +22,8 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
+    player.position.set(TILE_SIZE * 0,  height);
+
     collisionManager = new CollisionManager();
 
     collisionsEnabled = true;
@@ -45,6 +47,7 @@ class Scene {
 
     // TODO fix: hack to render goomba behind mario
     // after squash.
+    generateClouds();
     generateGroundTiles();
     
     generateCoins();
@@ -52,12 +55,14 @@ class Scene {
     //generateBrickTiles(6);
     generateStaircase();
     generatePlatform();
-    generateGoombas();
     generateCoinBox();
 
+    generateGoombas();
     generateSpineys();
-    generateClouds();
+    
     awake();
+
+    
   }
 
   Scene() {
@@ -122,6 +127,14 @@ class Scene {
   void render() {
     background(96, 160, 255);
 
+    debug.addString("");
+    debug.addString("KEYS");
+    debug.addString("--------");
+    debug.addString(" D - Debugging toggle");
+    debug.addString(" I - Invincibility toggle");
+    debug.addString(" R - Restart scene");
+    debug.addString("");
+
     debug.addString("Dimensions: [" + width + "," + height + "]");
     debug.addString("FPS: " + int(frameRate));
     debug.addString("collision check time: " + collisionCheckTime);
@@ -175,9 +188,9 @@ class Scene {
   void generateCoins() {
     for (int numGroups = 0; numGroups < 5; numGroups++) {
       for (int x = 0; x < 3; x++) {
-        for (int y = 0; y < 3; y++) {
+        for (int y = 1; y < 2; y++) {
           GameObject coin = gameObjectFactory.create("coin");
-          coin.position = new PVector((96) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
+          coin.position = new PVector((TILE_SIZE * 8) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
           gameObjects.add(coin);
           collisionManager.add(coin);
         }
@@ -186,9 +199,9 @@ class Scene {
   }
 
   void generateGoombas() {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 1; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(96 + i * (TILE_SIZE*10), 164 + i * (TILE_SIZE*10));
+      goomba.position = new PVector(0 + (i * TILE_SIZE) * 10, TILE_SIZE * 20);
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }
@@ -197,7 +210,8 @@ class Scene {
   void generateSpineys() {
     for (int i = 0; i < 8; i++) {
       GameObject spiney = gameObjectFactory.create("spiney");
-      spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
+      //spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
+      spiney.position = new PVector( width + (TILE_SIZE * 3) + (i * TILE_SIZE) * 20 , TILE_SIZE * 2);
       gameObjects.add(spiney);
       collisionManager.add(spiney);
     }
@@ -239,7 +253,7 @@ class Scene {
     GameObject brick;
     for(int i = 0; i < 3; ++i) {
       brick = gameObjectFactory.create("brick");
-      brick.setPosition(i * TILE_SIZE, TILE_SIZE * 4);
+      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 2, TILE_SIZE * 4);
       gameObjects.add(brick);
       collisionManager.add(brick);
     }
@@ -248,7 +262,7 @@ class Scene {
   void generateCoinBox(){
     GameObject coinBox;
     coinBox = gameObjectFactory.create("coinbox");
-    coinBox.setPosition(TILE_SIZE * 3, TILE_SIZE * 4);
+    coinBox.setPosition(TILE_SIZE * 5, TILE_SIZE * 4);
     gameObjects.add(coinBox);
     collisionManager.add(coinBox);
   }

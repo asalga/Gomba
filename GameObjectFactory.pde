@@ -121,9 +121,6 @@ class GameObjectFactory {
       animation.play("idle");
       ground.addComponent(animation);
 
-      BrickControllerComponent controller = new BrickControllerComponent();
-      ground.addComponent(controller);
-
       return ground;
     }
 
@@ -181,9 +178,9 @@ class GameObjectFactory {
       brick.addComponent(controller);
 
       StructureBounceComponent bounceComponent = new StructureBounceComponent();
-      // set props...
+      bounceComponent.bounceHeight = 16;
+      bounceComponent.bounceSpeed = 10;
       brick.addComponent(bounceComponent);
-
 
       return brick;
     }
@@ -211,6 +208,7 @@ class GameObjectFactory {
       aniComp.addClip("squashed", squashed);
 
       GoombaControllerComponent controllerComp = new GoombaControllerComponent();
+      controllerComp.delayBeforeRemoval = 0.25;
       goomba.addComponent(controllerComp);
 
       PatrolEnemyPhysicsComponent physics = new PatrolEnemyPhysicsComponent();
@@ -276,7 +274,8 @@ class GameObjectFactory {
       // Add list of objects inside coinbox?
 
       StructureBounceComponent bounceComponent = new StructureBounceComponent();
-      // set props...
+      bounceComponent.bounceHeight = 16;
+      bounceComponent.bounceSpeed = 10;
       coinBox.addComponent(bounceComponent);
 
       return coinBox;
