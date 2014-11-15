@@ -5,9 +5,12 @@ class SpriteControllerComponent extends Component {
 
   // SpriteController component manages behvaviour of sprites
 
-  boolean alive;
+  // Properties
   boolean squashable;
   boolean hurtsPlayerOnSquash;
+  //
+
+  boolean alive;
 
   SpriteControllerComponent() {
     super();
@@ -106,8 +109,8 @@ class SpriteControllerComponent extends Component {
 
   void render(){
     PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    if(physics != null){
-      //text(""+ physics._isTouchingFloor, gameObject.position.x, -gameObject.position.y);
+    if(physics != null && debugPrint == true){
+      text(""+ physics._isTouchingFloor, gameObject.position.x, -gameObject.position.y);
     }
   }
 }

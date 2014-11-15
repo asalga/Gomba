@@ -46,6 +46,7 @@ class Scene {
 
     // TODO fix: hack to render goomba behind mario
     // after squash.
+    generateClouds();
     generateGroundTiles();
     
     generateCoins();
@@ -57,7 +58,7 @@ class Scene {
     generateCoinBox();
 
     generateSpineys();
-    generateClouds();
+    
     awake();
 
     player.position = new PVector( TILE_SIZE * 4, TILE_SIZE * 8);
@@ -202,9 +203,9 @@ class Scene {
   }
 
   void generateGoombas() {
-    for (int i = 1; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
-      goomba.position = new PVector(i * (TILE_SIZE * 25), i + (TILE_SIZE * 8));
+      goomba.position = new PVector(width + (i * TILE_SIZE) * 20, TILE_SIZE * 2);
       gameObjects.add(goomba);
       collisionManager.add(goomba);
     }
@@ -213,7 +214,8 @@ class Scene {
   void generateSpineys() {
     for (int i = 0; i < 8; i++) {
       GameObject spiney = gameObjectFactory.create("spiney");
-      spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
+      //spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
+      spiney.position = new PVector( width + (TILE_SIZE * 3) + (i * TILE_SIZE) * 20 , TILE_SIZE * 2);
       gameObjects.add(spiney);
       collisionManager.add(spiney);
     }
