@@ -11,11 +11,14 @@ class SpriteControllerComponent extends Component {
   //
 
   boolean alive;
+  boolean wasKicked;
 
   SpriteControllerComponent() {
     super();
     componentName = "SpriteControllerComponent";
     alive = true;
+    wasKicked = false;
+
     squashable = true;
     hurtsPlayerOnSquash = false;
   }
@@ -57,35 +60,41 @@ class SpriteControllerComponent extends Component {
   }
 
   void kick() {
-    // TODO: comment
-    BoundingBoxComponent bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
-    bounds.setEnableCollisions(false);
     
-    PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
-    if(physics != null){
-      
-      physics.setGroundY(0);
-      physics.setGravity(0, -200);
-      physics.applyForce(0, 450);
-      physics.setTouchingFloor(false);
-      
-      soundManager.playSound("smb_stomp");
+    if(wasKicked == false){
+      wasKicked = true;
 
-      /*
-      // disconnect?
-      // 1) invalidate object?
-      // 2) disable object?
-      // 3) update components to tell them which ones are valid?
-      // 4) nullify objects?
-      // 5) make component get component continusouly.?
-      //gameObject.removeComponent("BoundingBoxComponent");
-  
-      alive = false;*/
+
+      // TODO: comment
+      BoundingBoxComponent bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+      bounds.setEnableCollisions(false);
       
-      // It would look strange if the animation kept playing, so pause it.
-      AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-      ani.pause();
-      ani.setFlipY(true);
+      PhysicsComponent physics = (PhysicsComponent)gameObject.getComponent("PhysicsComponent");
+      if(physics != null){
+        
+        physics.setGroundY(0);
+        physics.setGravity(0, -200);
+        physics.applyForce(0, 450);
+        physics.setTouchingFloor(false);
+        
+        soundManager.playSound("smb_stomp");
+
+        /*
+        // disconnect?
+        // 1) invalidate object?
+        // 2) disable object?
+        // 3) update components to tell them which ones are valid?
+        // 4) nullify objects?
+        // 5) make component get component continusouly.?
+        //gameObject.removeComponent("BoundingBoxComponent");
+    
+        alive = false;*/
+        
+        // It would look strange if the animation kept playing, so pause it.
+        AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+        ani.pause();
+        ani.setFlipY(true);
+      }
     }
   }
 
