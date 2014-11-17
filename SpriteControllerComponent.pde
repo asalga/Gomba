@@ -66,8 +66,10 @@ class SpriteControllerComponent extends Component {
       
       physics.setGroundY(0);
       physics.setGravity(0, -200);
+      physics.applyForce(0, 450);
       physics.setTouchingFloor(false);
-      physics.applyForce(0, 10);
+      
+      soundManager.playSound("smb_stomp");
 
       /*
       // disconnect?
@@ -79,10 +81,11 @@ class SpriteControllerComponent extends Component {
       //gameObject.removeComponent("BoundingBoxComponent");
   
       alive = false;*/
+      
       // It would look strange if the animation kept playing, so pause it.
-      //AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
-      //ani.pause();
-      //ani.setFlipY(true);
+      AnimationComponent ani = (AnimationComponent)gameObject.getComponent("AnimationComponent");
+      ani.pause();
+      ani.setFlipY(true);
     }
   }
 
