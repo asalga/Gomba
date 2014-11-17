@@ -211,9 +211,13 @@ class MarioControllerComponent extends Component {
   void hitStructureY(GameObject structure){
     if(getJumpState()){
       dprintln("Punched strucure");
+      
       physics.setVelocityY(0);
       StructureControllerComponent controller = (StructureControllerComponent)structure.getComponent("StructureControllerComponent");
-      controller.hit(gameObject);
+      
+      if(controller != null){
+        controller.hit(gameObject);
+      }
     }
   }
 

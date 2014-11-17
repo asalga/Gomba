@@ -1,6 +1,6 @@
-/////////////////////////////////
+/////////////////////////////
 // BrickControllerComponent
-/////////////////////////////////
+/////////////////////////////
 class BrickControllerComponent extends StructureControllerComponent {
 
   StructureBounceComponent bounceComponent;
@@ -25,7 +25,11 @@ class BrickControllerComponent extends StructureControllerComponent {
 
   void hit(GameObject other) {
     super.hit(other);
-    bounceComponent.bounce();
+
     soundManager.playSound("bump");
+
+    if(bounceComponent != null){
+      bounceComponent.bounce();
+    }
   }
 }

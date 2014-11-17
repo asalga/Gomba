@@ -12,7 +12,7 @@ class StructureBounceComponent extends StructureControllerComponent{
 	float yPos;
 	boolean bouncing;
 	float original;
-	BoundingBoxComponent bounds;
+	
 	AnimationComponent animation;
 
 	StructureBounceComponent(){
@@ -28,7 +28,7 @@ class StructureBounceComponent extends StructureControllerComponent{
 
 	void awake(){
 		super.awake();
-		bounds = (BoundingBoxComponent)gameObject.getComponent("BoundingBoxComponent");
+		
 		animation = (AnimationComponent)gameObject.getComponent("AnimationComponent");
 	}
 
@@ -40,20 +40,7 @@ class StructureBounceComponent extends StructureControllerComponent{
 		original = gameObject.position.y;
 	}
 
-	void hit(GameObject other){
-
-		
-		// TODO: tell any sprites walking on this structure to get kicked()
-		/*for(int i = 0; i < bounds.colliders.size(); i++ ){
-	      	for(String key: bounds.colliders.keySet()){
-	      		GameObject go = bounds.colliders.get(key);
-	      		SpriteControllerComponent sprite = (SpriteControllerComponent)go.getComponent("SpriteControllerComponent");
-	      		if(sprite != null){
-	      			sprite.kick();
-	      		}
-	      	}
-	    }*/
-	}
+	//void hit(GameObject other){ }
 
 	void update(float dt){
 		if(bouncing == true){
