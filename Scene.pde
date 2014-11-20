@@ -3,6 +3,7 @@
 //////////
 class Scene {
   ArrayList<GameObject> gameObjects;
+
   GameObject player;
   GameObject gameCamera;
   CameraComponent camComp;
@@ -14,6 +15,41 @@ class Scene {
   boolean collisionsEnabled;
   Timer collisionTimer;
   Timer renderTimer;
+
+  RenderLayer renderLayer;
+
+  class RenderLayer {
+    int layer;
+    ArrayList<GameObject> gameObjects;
+
+    RenderLayer(int layer){
+      this.layer = layer;
+      gameObjects = new ArrayList<GameObject>();
+    }
+
+    void render(){
+      for (int i = 0; i < gameObjects.size(); i++) {
+        GameObject go = gameObjects.get(i);
+
+        // already did camera's render in preRender
+        if (go.hasTag("camera")) {
+          continue;
+        }
+
+        go.render();
+      }
+    }
+
+    void add(GameObject go){
+      gameObjects.add(go);
+    }
+
+    void remove(GameObject go){
+      gameObjects.remove(go);
+    }
+  }
+  // End of RenderLayer
+
 
   void load() {
     isPaused = false;
@@ -27,6 +63,8 @@ class Scene {
     collisionManager = new CollisionManager();
 
     collisionsEnabled = true;
+
+    renderLayer = new RenderLayer(0);
 
     // Move to factory?
     gameCamera = new GameObject();
@@ -42,8 +80,9 @@ class Scene {
     renderTimer = new Timer();
 
     collisionManager.add(player);
-    gameObjects.add(player);
-    gameObjects.add(gameCamera);
+    
+    addGameObject(player);
+    addGameObject(gameCamera);
 
     // TODO fix: hack to render goomba behind mario
     // after squash.
@@ -61,12 +100,15 @@ class Scene {
     generateSpineys();
     
     awake();
-
-    
   }
 
   Scene() {
     load();
+  }
+
+  void addGameObject(GameObject gameObject){
+    renderLayer.add(gameObject);
+    gameObjects.add(gameObject);
   }
 
   PVector getCamPos() {
@@ -143,16 +185,10 @@ class Scene {
     renderTimer.tick();
 
     camComp.preRender();
-    for (int i = 0; i < gameObjects.size(); i++) {
-      GameObject go = gameObjects.get(i);
+    
+    // Render all the layers
+    renderLayer.render();
 
-      // already did camera's render in preRender
-      if (go.hasTag("camera")) {
-        continue;
-      }
-
-      go.render();
-    }
     camComp.postRender();
     renderTimer.tick();
 
@@ -202,7 +238,7 @@ class Scene {
     for (int i = 1; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
       goomba.position = new PVector(0 + (i * TILE_SIZE) * 10, TILE_SIZE * 20);
-      gameObjects.add(goomba);
+      addGameObject(goomba);
       collisionManager.add(goomba);
     }
   }
@@ -212,7 +248,7 @@ class Scene {
       GameObject spiney = gameObjectFactory.create("spiney");
       //spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
       spiney.position = new PVector( width + (TILE_SIZE * 3) + (i * TILE_SIZE) * 20 , TILE_SIZE * 2);
-      gameObjects.add(spiney);
+      addGameObject(spiney);
       collisionManager.add(spiney);
     }
   }
@@ -223,7 +259,7 @@ class Scene {
     for (int x = -TILE_SIZE * 4; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 1); x += TILE_SIZE) {
       GameObject ground = gameObjectFactory.create("ground");
       ground.setPosition(x, TILE_SIZE);
-      gameObjects.add(ground);
+      addGameObject(ground);
       collisionManager.add(ground);
     }
   }
@@ -234,7 +270,7 @@ class Scene {
 
   void generateClouds() {
     GameObject cloud = gameObjectFactory.create("cloud");
-    gameObjects.add(cloud);
+    addGameObject(cloud);
   }
 
   void generateStaircase() {
@@ -243,7 +279,7 @@ class Scene {
       for (x=y; x < 4; x++) {
         GameObject brick = gameObjectFactory.create("brick");
         brick.setPosition((TILE_SIZE* 6) +  x * TILE_SIZE, TILE_SIZE * y + (TILE_SIZE* 7));
-        gameObjects.add(brick);
+        addGameObject(brick);
         collisionManager.add(brick);
       }
     }
@@ -254,7 +290,7 @@ class Scene {
     for(int i = 0; i < 3; ++i) {
       brick = gameObjectFactory.create("brick");
       brick.setPosition(i * TILE_SIZE + TILE_SIZE * 2, TILE_SIZE * 4);
-      gameObjects.add(brick);
+      addGameObject(brick);
       collisionManager.add(brick);
     }
   }
@@ -263,7 +299,7 @@ class Scene {
     GameObject coinBox;
     coinBox = gameObjectFactory.create("coinbox");
     coinBox.setPosition(TILE_SIZE * 5, TILE_SIZE * 4);
-    gameObjects.add(coinBox);
+    addGameObject(coinBox);
     collisionManager.add(coinBox);
   }
 
@@ -272,7 +308,7 @@ class Scene {
     for (int x = -TILE_SIZE; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 1); x += TILE_SIZE) {
       GameObject brick = gameObjectFactory.create("brick");
       brick.setPosition(x, TILE_SIZE * y);
-      gameObjects.add(brick);
+      addGameObject(brick);
       collisionManager.add(brick);
     }
   }

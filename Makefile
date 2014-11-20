@@ -28,6 +28,7 @@ minify:
 		MarioControllerComponent.pde    \
 		PatrolEnemyPhysicsComponent.pde \
 		PhysicsComponent.pde            \
+		Queue.pde                       \
 		Scene.pde                       \
 		SpriteControllerComponent.pde   \
 		StructureBounceComponent.pde    \
