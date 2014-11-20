@@ -16,40 +16,7 @@ class Scene {
   Timer collisionTimer;
   Timer renderTimer;
 
-  RenderLayer renderLayer;
-
-  class RenderLayer {
-    int layer;
-    ArrayList<GameObject> gameObjects;
-
-    RenderLayer(int layer){
-      this.layer = layer;
-      gameObjects = new ArrayList<GameObject>();
-    }
-
-    void render(){
-      for (int i = 0; i < gameObjects.size(); i++) {
-        GameObject go = gameObjects.get(i);
-
-        // already did camera's render in preRender
-        if (go.hasTag("camera")) {
-          continue;
-        }
-
-        go.render();
-      }
-    }
-
-    void add(GameObject go){
-      gameObjects.add(go);
-    }
-
-    void remove(GameObject go){
-      gameObjects.remove(go);
-    }
-  }
-  // End of RenderLayer
-
+  BinaryTree<RenderOrder, RenderLayer> renderLayers;
 
   void load() {
     isPaused = false;
@@ -58,13 +25,13 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
-    player.position.set(TILE_SIZE * 0,  height);
+    player.position.set(TILE_SIZE,  height);
 
     collisionManager = new CollisionManager();
 
     collisionsEnabled = true;
 
-    renderLayer = new RenderLayer(0);
+    renderLayers = new BinaryTree<RenderOrder, RenderLayer>();
 
     // Move to factory?
     gameCamera = new GameObject();
@@ -83,9 +50,7 @@ class Scene {
     
     addGameObject(player);
     addGameObject(gameCamera);
-
-    // TODO fix: hack to render goomba behind mario
-    // after squash.
+    
     generateClouds();
     generateGroundTiles();
     
@@ -107,7 +72,24 @@ class Scene {
   }
 
   void addGameObject(GameObject gameObject){
-    renderLayer.add(gameObject);
+    
+    // if tree is empty, add a 0 layer
+    if(renderLayers.isEmpty()){      
+      RenderLayer layer = new RenderLayer();
+      renderLayers.put(new RenderOrder(gameObject.renderLayer), layer);
+      layer.add(gameObject);
+    }
+    else{
+      RenderLayer layer = renderLayers.get(new RenderOrder(gameObject.renderLayer));
+      
+      if(layer == null){
+        layer = new RenderLayer();
+        RenderOrder renderOrder = new RenderOrder(gameObject.renderLayer);
+        renderLayers.put(renderOrder, layer);
+      }
+      layer.add(gameObject);  
+    }
+    
     gameObjects.add(gameObject);
   }
 
@@ -185,9 +167,12 @@ class Scene {
     renderTimer.tick();
 
     camComp.preRender();
-    
-    // Render all the layers
-    renderLayer.render();
+        
+    Iterator<RenderLayer> iter = renderLayers.iterator();
+    while(iter.hasNext()){
+      RenderLayer layer = (RenderLayer)iter.next();
+      layer.render();
+    }
 
     camComp.postRender();
     renderTimer.tick();
@@ -289,7 +274,7 @@ class Scene {
     GameObject brick;
     for(int i = 0; i < 3; ++i) {
       brick = gameObjectFactory.create("brick");
-      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 2, TILE_SIZE * 4);
+      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 3, TILE_SIZE * 4);
       addGameObject(brick);
       collisionManager.add(brick);
     }
@@ -298,7 +283,7 @@ class Scene {
   void generateCoinBox(){
     GameObject coinBox;
     coinBox = gameObjectFactory.create("coinbox");
-    coinBox.setPosition(TILE_SIZE * 5, TILE_SIZE * 4);
+    coinBox.setPosition(TILE_SIZE * 6, TILE_SIZE * 4);
     addGameObject(coinBox);
     collisionManager.add(coinBox);
   }

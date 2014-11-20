@@ -11,6 +11,7 @@ minify:
 		AtlasParser.pde                 \
 		AtlasParserJSON.js              \
 		AtlasParserXML.js               \
+		BinaryTree.pde                  \
 		BoundingBoxComponent.pde        \
 		BrickControllerComponent.pde	\
 		BoundingBoxXComponent.pde       \
@@ -29,6 +30,7 @@ minify:
 		PatrolEnemyPhysicsComponent.pde \
 		PhysicsComponent.pde            \
 		Queue.pde                       \
+		RenderLayer.pde                 \
 		Scene.pde                       \
 		SpriteControllerComponent.pde   \
 		StructureBounceComponent.pde    \
