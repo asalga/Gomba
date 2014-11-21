@@ -28,6 +28,10 @@ class RenderLayer {
   void remove(GameObject go) {
     gameObjects.remove(go);
   }
+  
+  ArrayList<GameObject> getList(){
+    return gameObjects;
+  }
 }
 
 ////////////////

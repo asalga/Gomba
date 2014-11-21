@@ -4,6 +4,8 @@
 class Scene {
   ArrayList<GameObject> gameObjects;
 
+  // allow moving gameobject between layers
+
   GameObject player;
   GameObject gameCamera;
   CameraComponent camComp;
@@ -55,8 +57,6 @@ class Scene {
     generateGroundTiles();
     
     generateCoins();
-    //generateBrickTiles(5);
-    //generateBrickTiles(6);
     generateStaircase();
     generatePlatform();
     generateCoinBox();
@@ -132,6 +132,21 @@ class Scene {
 
     if (collisionsEnabled) {
       collisionManager.removeDeadObjects();
+    }
+    
+    // 
+    Iterator<RenderLayer> iter = renderLayers.iterator();
+    while(iter.hasNext()){
+      RenderLayer layer = (RenderLayer)iter.next();  
+
+      ArrayList<GameObject> gameObjects = layer.getList();
+      for(int i = gameObjects.size()-1; i >= 0; i--){
+        GameObject go = gameObjects.get(i);
+        if(go.requiresRemoval){
+          gameObjects.remove(i);
+        }
+      }
+      layer.render();
     }
 
     timer.tick();
