@@ -8,14 +8,16 @@ class GameObject {
   HashMap<String, ArrayList<Component> > components;
   boolean requiresRemoval;
   int id;
+  int renderLayer;
 
   GameObject() {
     position = new PVector();
     name = "";
-    components = new HashMap<String, ArrayList<Component>>();
     tags = new ArrayList<String>();
+    components = new HashMap<String, ArrayList<Component>>();
     requiresRemoval = false;
     id = Utils.getNextID();
+    renderLayer = 0;
   }
 
   void addComponent(Component component) {

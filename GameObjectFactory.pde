@@ -3,6 +3,18 @@
 //////////////////////
 class GameObjectFactory {
 
+  // Layers....
+  //  - background fill
+  //  - clouds, bushes, ...
+  //  - pickups
+  //  - sprites
+  //  - structures
+  //  - dead/kicked(falling) sprites
+  //  - particle systems
+  //  - HUD
+  //
+  //  - where do squashed goombas get rendered?
+
   public GameObject create(String id) {
 
     // PLAYER
@@ -10,6 +22,7 @@ class GameObjectFactory {
       GameObject player = new GameObject();
       player.name = "player";
       player.addTag("player");
+      player.renderLayer = 5;
 
       PhysicsComponent physicsComp = new PhysicsComponent();
       physicsComp.setMaxXSpeed(300);
@@ -102,6 +115,8 @@ class GameObjectFactory {
     //
     else if (id == "ground") {
       GameObject ground = new GameObject();
+      ground.renderLayer = 1;
+      ground.name = "ground";
       ground.addTag("structure");
 
       WrapAroundComponent c = new WrapAroundComponent();
@@ -129,6 +144,8 @@ class GameObjectFactory {
     //
     else if (id == "cloud") {
       GameObject cloud = new GameObject();
+      cloud.renderLayer = 1;
+      cloud.name = "cloud";
       
       WrapAroundComponent wrapAround = new WrapAroundComponent();
       wrapAround.extraBuffer = TILE_SIZE * 9;
@@ -153,9 +170,11 @@ class GameObjectFactory {
     //
     // BRICK
     //
-    else if ( id == "brick") {
+    else if (id == "brick") {
       GameObject brick = new GameObject();
       brick.addTag("structure");
+      brick.name = "brick";
+      brick.renderLayer = 10;
 
       WrapAroundComponent wrapAround = new WrapAroundComponent();
       brick.addComponent(wrapAround);
@@ -245,6 +264,7 @@ class GameObjectFactory {
       GameObject coinBox = new GameObject();
       coinBox.addTag("coinbox");
       coinBox.addTag("structure");
+      coinBox.renderLayer = 10;
 
       AnimationComponent aniComp = new AnimationComponent();
       coinBox.addComponent(aniComp);
