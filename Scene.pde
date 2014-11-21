@@ -5,6 +5,8 @@ class Scene {
   ArrayList<GameObject> gameObjects;
 
   // allow moving gameobject between layers
+  // cache iterator for renderlayers
+  //
 
   GameObject player;
   GameObject gameCamera;
@@ -53,17 +55,18 @@ class Scene {
     addGameObject(player);
     addGameObject(gameCamera);
     
+    generateCoins();
+
     generateClouds();
     generateGroundTiles();
     
-    generateCoins();
     generateStaircase();
     generatePlatform();
     generateCoinBox();
 
     generateGoombas();
     generateSpineys();
-    
+   
     awake();
   }
 
@@ -72,19 +75,20 @@ class Scene {
   }
 
   void addGameObject(GameObject gameObject){
-    
+    int layerIndex = gameObject.renderLayer;
+
     // if tree is empty, add a 0 layer
     if(renderLayers.isEmpty()){      
-      RenderLayer layer = new RenderLayer();
-      renderLayers.put(new RenderOrder(gameObject.renderLayer), layer);
+      RenderLayer layer = new RenderLayer(layerIndex);
+      renderLayers.put(new RenderOrder(layerIndex), layer);
       layer.add(gameObject);
     }
     else{
-      RenderLayer layer = renderLayers.get(new RenderOrder(gameObject.renderLayer));
+      RenderLayer layer = renderLayers.get(new RenderOrder(layerIndex));
       
       if(layer == null){
-        layer = new RenderLayer();
-        RenderOrder renderOrder = new RenderOrder(gameObject.renderLayer);
+        layer = new RenderLayer(layerIndex);
+        RenderOrder renderOrder = new RenderOrder(layerIndex);
         renderLayers.put(renderOrder, layer);
       }
       layer.add(gameObject);  
@@ -148,6 +152,32 @@ class Scene {
       layer.render();
     }
 
+
+    // Move any gameobjects between layers if necessary
+    iter = renderLayers.iterator();
+    while(iter.hasNext()){
+      RenderLayer layer = (RenderLayer)iter.next();  
+      int layerIndex = layer.getIndex();
+
+      // if layerIndex does not match the gameObjects layer.
+      // get the layer and add the gameobject to it, then remove it from this layer
+      ArrayList<GameObject> layeredGameObjects = layer.getList();
+      for(int i = layeredGameObjects.size()-1; i >= 0; i--){
+        int goLayer = layeredGameObjects.get(i).renderLayer;
+
+        if(layeredGameObjects.get(i).renderLayer != layerIndex){
+          RenderLayer properLayer = renderLayers.get(new RenderOrder(goLayer));
+          
+          if(properLayer == null){
+            properLayer = new RenderLayer(goLayer);
+            renderLayers.put(new RenderOrder(goLayer), properLayer);
+          }
+          properLayer.getList().add(layeredGameObjects.get(i));
+          layeredGameObjects.remove(i);
+        }
+      }
+    }
+
     // Find any objects that need to be removed from the scene
     for (int i = gameObjects.size()-1; i >= 0; i--) {
       if (gameObjects.get(i).requiresRemoval) {
@@ -199,7 +229,6 @@ class Scene {
     renderTimer.tick();
 
     debug.addString("Render time: " + renderTimer.getTotalTime());
-
     debug.addString("Collision Tests: " + numCollisionTests);
     debug.addString("Collision Tests Skipped: " + numCollisionTestsSkipped);
 
@@ -225,8 +254,9 @@ class Scene {
       for (int x = 0; x < 3; x++) {
         for (int y = 1; y < 2; y++) {
           GameObject coin = gameObjectFactory.create("coin");
-          coin.position = new PVector((TILE_SIZE * 8) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + TILE_SIZE);
-          gameObjects.add(coin);
+          coin.position = new PVector( (TILE_SIZE * 8) + (numGroups*25*TILE_SIZE) + x * TILE_SIZE, 
+                                        TILE_SIZE + y * TILE_SIZE);
+          addGameObject(coin);
           collisionManager.add(coin);
         }
       }

@@ -86,6 +86,7 @@ class GameObjectFactory {
     else if (id == "coin") {
       GameObject coin = new GameObject();
       coin.name = "coin";
+      coin.renderLayer = 2;
 
       AnimationClip idleClip = new AnimationClip();
       for (int i = 0; i < 4; i++) {
@@ -211,6 +212,7 @@ class GameObjectFactory {
       GameObject goomba = new GameObject();
       goomba.addTag("enemy");
       goomba.name = "goomba";
+      goomba.renderLayer = 4;
 
       AnimationComponent aniComp = new AnimationComponent();
       goomba.addComponent(aniComp);
