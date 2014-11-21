@@ -29,7 +29,10 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
-    player.position.set(TILE_SIZE,  height);
+    
+    player.position.set(TILE_SIZE, TILE_SIZE*4);
+    // fix tunnelling
+    //player.position.set(TILE_SIZE, height);
 
     collisionManager = new CollisionManager();
 
