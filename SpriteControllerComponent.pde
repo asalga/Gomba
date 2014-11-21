@@ -79,6 +79,8 @@ class SpriteControllerComponent extends Component {
         
         soundManager.playSound("smb_stomp");
 
+        gameObject.renderLayer = 15;
+
         /*
         // disconnect?
         // 1) invalidate object?

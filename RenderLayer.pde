@@ -3,9 +3,11 @@
 ////////////////
 class RenderLayer {
   ArrayList<GameObject> gameObjects;
+  int index;
 
-  RenderLayer() {
+  RenderLayer(int i) {
     gameObjects = new ArrayList<GameObject>();
+    index = i;
   }
 
   void render() {
@@ -31,6 +33,10 @@ class RenderLayer {
   
   ArrayList<GameObject> getList(){
     return gameObjects;
+  }
+
+  int getIndex(){
+    return index;
   }
 }
 
