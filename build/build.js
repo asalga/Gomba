@@ -332,6 +332,129 @@ class AtlasParserXML implements AtlasParser {
     return images;
   }
 }
+///////////////
+// Comparable
+///////////////
+public interface Comparable <T> {
+  int compareTo(Object obj);
+}
+
+public interface Iterator<T> {
+  boolean hasNext();
+  T next();
+}
+
+public interface Iterable{
+  Iterator iterator();
+}
+
+///////////////
+// BinaryTree
+///////////////
+public class BinaryTree<Key extends Comparable, Val> implements Iterable{
+  private Node root;
+
+  /////////
+  // Node
+  /////////
+  private class Node {
+    private Key k;
+    private Val v;
+    private Node left, right;
+
+    public Node(Key k, Val v) {
+      this.k = k;
+      this.v = v;
+    }
+  }
+
+  /////////////////
+  // NodeIterator
+  /////////////////
+  private class NodeIterator implements Iterator<Val> {
+    int index;
+    ArrayList<Val> values;
+
+    NodeIterator(Node n){
+      index = 0;
+      values = new ArrayList<Val>();
+      insertInOrder(n);
+    }
+
+    public boolean hasNext(){
+      return index < values.size();
+    }
+
+    public Val next(){
+      Val v = values.get(index);
+      index++;
+      return v;
+    }
+
+    private void insertInOrder(Node root){
+      if(root.left != null){
+        insertInOrder(root.left);
+      }
+      
+      values.add(root.v);
+
+      if(root.right != null){
+        insertInOrder(root.right);
+      }
+    }
+  }
+
+  public boolean isEmpty(){
+    return root == null;
+  }
+
+  //
+  public void put(Key k, Val v) {
+    root = put(root, k, v);
+  }
+
+  public Val get(Key k) {
+    return get(root, k);
+  }
+
+  private Val get(Node n, Key k) {
+    if (n == null) return null;
+
+    int cmp = k.compareTo(n.k);
+    if (cmp < 0) { 
+      return get(n.left, k);
+    }
+    else if (cmp > 0) {
+      return get(n.right, k);
+    }
+    else return n.v;
+  }
+
+  private Node put(Node r, Key k, Val v) {
+
+    if (r == null) {
+      return new Node(k, v);
+    }
+
+    int cmp = k.compareTo(r.k);
+
+    if (cmp < 0) {
+      r.left = put(r.left, k, v);
+    }
+    else if (cmp > 0) {
+      r.right = put(r.right, k, v);
+    }
+    else {
+      println("?????");
+    }
+    return r;
+  }
+
+  // implementing Iterable
+  public Iterator<Val> iterator() {
+    return new NodeIterator(root);
+  }
+}
 /////////////////////////
 // BoundingBoxComponent
 /////////////////////////
@@ -1031,14 +1154,16 @@ class GameObject {
   HashMap<String, ArrayList<Component> > components;
   boolean requiresRemoval;
   int id;
+  int renderLayer;
 
   GameObject() {
     position = new PVector();
     name = "";
-    components = new HashMap<String, ArrayList<Component>>();
     tags = new ArrayList<String>();
+    components = new HashMap<String, ArrayList<Component>>();
     requiresRemoval = false;
     id = Utils.getNextID();
+    renderLayer = 0;
   }
 
   void addComponent(Component component) {
@@ -1145,6 +1270,18 @@ class GameObject {
 //////////////////////
 class GameObjectFactory {
 
+  // Layers....
+  //  - background fill
+  //  - clouds, bushes, ...
+  //  - pickups
+  //  - sprites
+  //  - structures
+  //  - dead/kicked(falling) sprites
+  //  - particle systems
+  //  - HUD
+  //
+  //  - where do squashed goombas get rendered?
+
   public GameObject create(String id) {
 
     // PLAYER
@@ -1152,6 +1289,7 @@ class GameObjectFactory {
       GameObject player = new GameObject();
       player.name = "player";
       player.addTag("player");
+      player.renderLayer = 5;
 
       PhysicsComponent physicsComp = new PhysicsComponent();
       physicsComp.setMaxXSpeed(300);
@@ -1244,6 +1382,8 @@ class GameObjectFactory {
     //
     else if (id == "ground") {
       GameObject ground = new GameObject();
+      ground.renderLayer = 1;
+      ground.name = "ground";
       ground.addTag("structure");
 
       WrapAroundComponent c = new WrapAroundComponent();
@@ -1271,6 +1411,8 @@ class GameObjectFactory {
     //
     else if (id == "cloud") {
       GameObject cloud = new GameObject();
+      cloud.renderLayer = 1;
+      cloud.name = "cloud";
       
       WrapAroundComponent wrapAround = new WrapAroundComponent();
       wrapAround.extraBuffer = TILE_SIZE * 9;
@@ -1295,9 +1437,11 @@ class GameObjectFactory {
     //
     // BRICK
     //
-    else if ( id == "brick") {
+    else if (id == "brick") {
       GameObject brick = new GameObject();
       brick.addTag("structure");
+      brick.name = "brick";
+      brick.renderLayer = 10;
 
       WrapAroundComponent wrapAround = new WrapAroundComponent();
       brick.addComponent(wrapAround);
@@ -1387,6 +1531,7 @@ class GameObjectFactory {
       GameObject coinBox = new GameObject();
       coinBox.addTag("coinbox");
       coinBox.addTag("structure");
+      coinBox.renderLayer = 10;
 
       AnimationComponent aniComp = new AnimationComponent();
       coinBox.addComponent(aniComp);
@@ -2184,10 +2329,99 @@ class PhysicsComponent extends Component {
 }
 
 //////////
+// Queue
+//////////
+public class Queue<T> {
+  private ArrayList<T> items;
+
+  public Queue() {
+    items = new ArrayList<T>();
+  }
+
+  public void add(T i) {
+    items.add(i);
+  }
+
+  public T peek() {
+    return items.get(0);
+  }
+
+  public T remove() {
+    T item = items.get(0);
+    items.remove(0);
+    return item;
+  }
+
+  public boolean isEmpty() {
+    return items.isEmpty();
+  }
+
+  public int size() {
+    return items.size();
+  }
+
+  public void clear() {
+    items.clear();
+  }
+}
+////////////////
+// RenderLayer
+////////////////
+class RenderLayer {
+  ArrayList<GameObject> gameObjects;
+
+  RenderLayer() {
+    gameObjects = new ArrayList<GameObject>();
+  }
+
+  void render() {
+    for (int i = 0; i < gameObjects.size(); i++) {
+      GameObject go = gameObjects.get(i);
+
+      // already did camera's render in preRender
+      if (go.hasTag("camera")) {
+        continue;
+      }
+
+      go.render();
+    }
+  }
+
+  void add(GameObject go) {
+    gameObjects.add(go);
+  }
+
+  void remove(GameObject go) {
+    gameObjects.remove(go);
+  }
+  
+  ArrayList<GameObject> getList(){
+    return gameObjects;
+  }
+}
+
+////////////////
+// RenderOrder
+////////////////
+class RenderOrder implements Comparable {
+  int index;
+
+  RenderOrder(int i){
+    index = i;
+  }
+
+  int compareTo(Object obj){
+    return index - (int) ((RenderOrder)obj).index;
+  }
+}
+//////////
 // Scene  
 //////////
 class Scene {
   ArrayList<GameObject> gameObjects;
+
+  // allow moving gameobject between layers
+
   GameObject player;
   GameObject gameCamera;
   CameraComponent camComp;
@@ -2200,6 +2434,8 @@ class Scene {
   Timer collisionTimer;
   Timer renderTimer;
 
+  BinaryTree<RenderOrder, RenderLayer> renderLayers;
+
   void load() {
     isPaused = false;
     gameObjects = new ArrayList<GameObject>();
@@ -2207,11 +2443,13 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
-    player.position.set(TILE_SIZE * 0,  height);
+    player.position.set(TILE_SIZE,  height);
 
     collisionManager = new CollisionManager();
 
     collisionsEnabled = true;
+
+    renderLayers = new BinaryTree<RenderOrder, RenderLayer>();
 
     // Move to factory?
     gameCamera = new GameObject();
@@ -2227,17 +2465,14 @@ class Scene {
     renderTimer = new Timer();
 
     collisionManager.add(player);
-    gameObjects.add(player);
-    gameObjects.add(gameCamera);
-
-    // TODO fix: hack to render goomba behind mario
-    // after squash.
+    
+    addGameObject(player);
+    addGameObject(gameCamera);
+    
     generateClouds();
     generateGroundTiles();
     
     generateCoins();
-    //generateBrickTiles(5);
-    //generateBrickTiles(6);
     generateStaircase();
     generatePlatform();
     generateCoinBox();
@@ -2246,12 +2481,32 @@ class Scene {
     generateSpineys();
     
     awake();
-
-    
   }
 
   Scene() {
     load();
+  }
+
+  void addGameObject(GameObject gameObject){
+    
+    // if tree is empty, add a 0 layer
+    if(renderLayers.isEmpty()){      
+      RenderLayer layer = new RenderLayer();
+      renderLayers.put(new RenderOrder(gameObject.renderLayer), layer);
+      layer.add(gameObject);
+    }
+    else{
+      RenderLayer layer = renderLayers.get(new RenderOrder(gameObject.renderLayer));
+      
+      if(layer == null){
+        layer = new RenderLayer();
+        RenderOrder renderOrder = new RenderOrder(gameObject.renderLayer);
+        renderLayers.put(renderOrder, layer);
+      }
+      layer.add(gameObject);  
+    }
+    
+    gameObjects.add(gameObject);
   }
 
   PVector getCamPos() {
@@ -2294,6 +2549,27 @@ class Scene {
     if (collisionsEnabled) {
       collisionManager.removeDeadObjects();
     }
+    
+    // 
+    Iterator<RenderLayer> iter = renderLayers.iterator();
+    while(iter.hasNext()){
+      RenderLayer layer = (RenderLayer)iter.next();  
+
+      ArrayList<GameObject> gameObjects = layer.getList();
+      for(int i = gameObjects.size()-1; i >= 0; i--){
+        if(gameObjects.get(i).requiresRemoval){
+          gameObjects.remove(i);
+        }
+      }
+      layer.render();
+    }
+
+    // Find any objects that need to be removed from the scene
+    for (int i = gameObjects.size()-1; i >= 0; i--) {
+      if (gameObjects.get(i).requiresRemoval) {
+        gameObjects.remove(i);
+      }
+    }
 
     timer.tick();
     for (int i = 0; i < gameObjects.size(); i++) {
@@ -2328,27 +2604,17 @@ class Scene {
     renderTimer.tick();
 
     camComp.preRender();
-    for (int i = 0; i < gameObjects.size(); i++) {
-      GameObject go = gameObjects.get(i);
-
-      // already did camera's render in preRender
-      if (go.hasTag("camera")) {
-        continue;
-      }
-
-      go.render();
+        
+    Iterator<RenderLayer> iter = renderLayers.iterator();
+    while(iter.hasNext()){
+      RenderLayer layer = (RenderLayer)iter.next();
+      layer.render();
     }
+
     camComp.postRender();
     renderTimer.tick();
 
     debug.addString("Render time: " + renderTimer.getTotalTime());
-
-    // Find any objects that need to be removed from the scene
-    for (int i = gameObjects.size()-1; i >= 0; i--) {
-      if (gameObjects.get(i).requiresRemoval) {
-        gameObjects.remove(i);
-      }
-    }
 
     debug.addString("Collision Tests: " + numCollisionTests);
     debug.addString("Collision Tests Skipped: " + numCollisionTestsSkipped);
@@ -2387,7 +2653,7 @@ class Scene {
     for (int i = 1; i < 8; i++) {
       GameObject goomba = gameObjectFactory.create("goomba");
       goomba.position = new PVector(0 + (i * TILE_SIZE) * 10, TILE_SIZE * 20);
-      gameObjects.add(goomba);
+      addGameObject(goomba);
       collisionManager.add(goomba);
     }
   }
@@ -2397,7 +2663,7 @@ class Scene {
       GameObject spiney = gameObjectFactory.create("spiney");
       //spiney.position = new PVector(TILE_SIZE * 10 + (i * width), height);
       spiney.position = new PVector( width + (TILE_SIZE * 3) + (i * TILE_SIZE) * 20 , TILE_SIZE * 2);
-      gameObjects.add(spiney);
+      addGameObject(spiney);
       collisionManager.add(spiney);
     }
   }
@@ -2408,7 +2674,7 @@ class Scene {
     for (int x = -TILE_SIZE * 4; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 1); x += TILE_SIZE) {
       GameObject ground = gameObjectFactory.create("ground");
       ground.setPosition(x, TILE_SIZE);
-      gameObjects.add(ground);
+      addGameObject(ground);
       collisionManager.add(ground);
     }
   }
@@ -2419,7 +2685,7 @@ class Scene {
 
   void generateClouds() {
     GameObject cloud = gameObjectFactory.create("cloud");
-    gameObjects.add(cloud);
+    addGameObject(cloud);
   }
 
   void generateStaircase() {
@@ -2428,7 +2694,7 @@ class Scene {
       for (x=y; x < 4; x++) {
         GameObject brick = gameObjectFactory.create("brick");
         brick.setPosition((TILE_SIZE* 6) +  x * TILE_SIZE, TILE_SIZE * y + (TILE_SIZE* 7));
-        gameObjects.add(brick);
+        addGameObject(brick);
         collisionManager.add(brick);
       }
     }
@@ -2438,8 +2704,8 @@ class Scene {
     GameObject brick;
     for(int i = 0; i < 3; ++i) {
       brick = gameObjectFactory.create("brick");
-      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 2, TILE_SIZE * 4);
-      gameObjects.add(brick);
+      brick.setPosition(i * TILE_SIZE + TILE_SIZE * 3, TILE_SIZE * 4);
+      addGameObject(brick);
       collisionManager.add(brick);
     }
   }
@@ -2447,8 +2713,8 @@ class Scene {
   void generateCoinBox(){
     GameObject coinBox;
     coinBox = gameObjectFactory.create("coinbox");
-    coinBox.setPosition(TILE_SIZE * 5, TILE_SIZE * 4);
-    gameObjects.add(coinBox);
+    coinBox.setPosition(TILE_SIZE * 6, TILE_SIZE * 4);
+    addGameObject(coinBox);
     collisionManager.add(coinBox);
   }
 
@@ -2457,7 +2723,7 @@ class Scene {
     for (int x = -TILE_SIZE; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 1); x += TILE_SIZE) {
       GameObject brick = gameObjectFactory.create("brick");
       brick.setPosition(x, TILE_SIZE * y);
-      gameObjects.add(brick);
+      addGameObject(brick);
       collisionManager.add(brick);
     }
   }
