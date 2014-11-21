@@ -141,12 +141,18 @@ class Scene {
 
       ArrayList<GameObject> gameObjects = layer.getList();
       for(int i = gameObjects.size()-1; i >= 0; i--){
-        GameObject go = gameObjects.get(i);
-        if(go.requiresRemoval){
+        if(gameObjects.get(i).requiresRemoval){
           gameObjects.remove(i);
         }
       }
       layer.render();
+    }
+
+    // Find any objects that need to be removed from the scene
+    for (int i = gameObjects.size()-1; i >= 0; i--) {
+      if (gameObjects.get(i).requiresRemoval) {
+        gameObjects.remove(i);
+      }
     }
 
     timer.tick();
@@ -193,13 +199,6 @@ class Scene {
     renderTimer.tick();
 
     debug.addString("Render time: " + renderTimer.getTotalTime());
-
-    // Find any objects that need to be removed from the scene
-    for (int i = gameObjects.size()-1; i >= 0; i--) {
-      if (gameObjects.get(i).requiresRemoval) {
-        gameObjects.remove(i);
-      }
-    }
 
     debug.addString("Collision Tests: " + numCollisionTests);
     debug.addString("Collision Tests Skipped: " + numCollisionTestsSkipped);
