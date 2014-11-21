@@ -146,7 +146,6 @@ class GameObjectFactory {
       GameObject cloud = new GameObject();
       cloud.renderLayer = 1;
       cloud.name = "cloud";
-      println(" " + cloud.renderLayer);
       
       WrapAroundComponent wrapAround = new WrapAroundComponent();
       wrapAround.extraBuffer = TILE_SIZE * 9;
