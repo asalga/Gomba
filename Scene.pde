@@ -4,10 +4,6 @@
 class Scene {
   ArrayList<GameObject> gameObjects;
 
-  // allow moving gameobject between layers
-  // cache iterator for renderlayers
-  //
-
   GameObject player;
   GameObject gameCamera;
   CameraComponent camComp;
@@ -29,7 +25,10 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
-    player.position.set(TILE_SIZE,  height);
+    
+    player.position.set(TILE_SIZE, TILE_SIZE * 4);
+    // fix tunnelling
+    //player.position.set(TILE_SIZE, height);
 
     collisionManager = new CollisionManager();
 
@@ -66,7 +65,7 @@ class Scene {
 
     generateGoombas();
     generateSpineys();
-   
+
     awake();
   }
 
@@ -152,17 +151,16 @@ class Scene {
       layer.render();
     }
 
-
     // Move any gameobjects between layers if necessary
     iter = renderLayers.iterator();
     while(iter.hasNext()){
-      RenderLayer layer = (RenderLayer)iter.next();  
+      RenderLayer layer = (RenderLayer)iter.next();
       int layerIndex = layer.getIndex();
 
       // if layerIndex does not match the gameObjects layer.
       // get the layer and add the gameobject to it, then remove it from this layer
       ArrayList<GameObject> layeredGameObjects = layer.getList();
-      for(int i = layeredGameObjects.size()-1; i >= 0; i--){
+      for(int i = layeredGameObjects.size() - 1; i >= 0; i--){
         int goLayer = layeredGameObjects.get(i).renderLayer;
 
         if(layeredGameObjects.get(i).renderLayer != layerIndex){
@@ -172,6 +170,7 @@ class Scene {
             properLayer = new RenderLayer(goLayer);
             renderLayers.put(new RenderOrder(goLayer), properLayer);
           }
+
           properLayer.getList().add(layeredGameObjects.get(i));
           layeredGameObjects.remove(i);
         }
@@ -218,7 +217,7 @@ class Scene {
     renderTimer.tick();
 
     camComp.preRender();
-        
+    
     Iterator<RenderLayer> iter = renderLayers.iterator();
     while(iter.hasNext()){
       RenderLayer layer = (RenderLayer)iter.next();
