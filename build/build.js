@@ -352,7 +352,12 @@ public interface Iterable{
 // BinaryTree
 ///////////////
 public class BinaryTree<Key extends Comparable, Val> implements Iterable{
+  
+  //
   private Node root;
+
+  private NodeIterator cachedIterator;
+  private boolean isDirty;
 
   /////////
   // Node
@@ -361,10 +366,14 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
     private Key k;
     private Val v;
     private Node left, right;
+    private Node parent;
 
     public Node(Key k, Val v) {
       this.k = k;
       this.v = v;
+      left = null;
+      right = null;
+      parent = null;
     }
   }
 
@@ -373,35 +382,62 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
   /////////////////
   private class NodeIterator implements Iterator<Val> {
     int index;
-    ArrayList<Val> values;
+    Node current;
 
+    // NodeIterator
     NodeIterator(Node n){
       index = 0;
-      values = new ArrayList<Val>();
-      insertInOrder(n);
+      reset(n);
+    }
+
+    void reset(Node n){
+      current = n;
+
+      while(current.left != null){
+        current = current.left;
+      }
     }
 
     public boolean hasNext(){
-      return index < values.size();
+      return current != null;
     }
 
     public Val next(){
-      Val v = values.get(index);
-      index++;
-      return v;
-    }
 
-    private void insertInOrder(Node root){
-      if(root.left != null){
-        insertInOrder(root.left);
-      }
-      
-      values.add(root.v);
+      Node temp = current;
 
-      if(root.right != null){
-        insertInOrder(root.right);
+      if(current.right != null){
+        current = current.right;
+
+        // go all the way left.
+        while(current.left != null){
+          current = current.left;
+        }
       }
+      else{
+        //
+        while(true){
+          if(current.parent == null){
+            current = null;
+            return temp.v;
+          }
+          //
+          if(current.parent.left == current){
+            current = current.parent;
+            return temp.v;
+          }
+          current = current.parent;
+        }
+      }
+      return temp.v;
     }
+  }
+
+  // BinaryTree
+  public BinaryTree(){
+    root = null;
+    isDirty = true;
+    cachedIterator = null;
   }
 
   public boolean isEmpty(){
@@ -411,6 +447,7 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
   //
   public void put(Key k, Val v) {
     root = put(root, k, v);
+    isDirty = true;
   }
 
   public Val get(Key k) {
@@ -431,6 +468,7 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
   }
 
   private Node put(Node r, Key k, Val v) {
+    isDirty = true;
 
     if (r == null) {
       return new Node(k, v);
@@ -440,9 +478,11 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
 
     if (cmp < 0) {
       r.left = put(r.left, k, v);
+      r.left.parent = r;
     }
     else if (cmp > 0) {
       r.right = put(r.right, k, v);
+      r.right.parent = r;
     }
     else {
       println("?????");
@@ -451,8 +491,17 @@ public class BinaryTree<Key extends Comparable, Val> implements Iterable{
   }
 
   // implementing Iterable
-  public Iterator<Val> iterator() {
-    return new NodeIterator(root);
+  public Iterator<Val> iterator(){
+    
+    if(cachedIterator == null || isDirty){
+      cachedIterator = new NodeIterator(root);
+      isDirty = false;
+      return cachedIterator;
+    }
+    else{
+      cachedIterator.reset(root);
+      return cachedIterator;  
+    }
   }
 }
 /////////////////////////
@@ -2428,10 +2477,6 @@ class RenderOrder implements Comparable {
 class Scene {
   ArrayList<GameObject> gameObjects;
 
-  // allow moving gameobject between layers
-  // cache iterator for renderlayers
-  //
-
   GameObject player;
   GameObject gameCamera;
   CameraComponent camComp;
@@ -2453,7 +2498,10 @@ class Scene {
     timer = new Timer();
     gameObjectFactory = new GameObjectFactory();
     player = gameObjectFactory.create("player");
-    player.position.set(TILE_SIZE,  height);
+    
+    player.position.set(TILE_SIZE, TILE_SIZE * 4);
+    // fix tunnelling
+    //player.position.set(TILE_SIZE, height);
 
     collisionManager = new CollisionManager();
 
@@ -2490,7 +2538,7 @@ class Scene {
 
     generateGoombas();
     generateSpineys();
-   
+
     awake();
   }
 
@@ -2576,17 +2624,16 @@ class Scene {
       layer.render();
     }
 
-
     // Move any gameobjects between layers if necessary
     iter = renderLayers.iterator();
     while(iter.hasNext()){
-      RenderLayer layer = (RenderLayer)iter.next();  
+      RenderLayer layer = (RenderLayer)iter.next();
       int layerIndex = layer.getIndex();
 
       // if layerIndex does not match the gameObjects layer.
       // get the layer and add the gameobject to it, then remove it from this layer
       ArrayList<GameObject> layeredGameObjects = layer.getList();
-      for(int i = layeredGameObjects.size()-1; i >= 0; i--){
+      for(int i = layeredGameObjects.size() - 1; i >= 0; i--){
         int goLayer = layeredGameObjects.get(i).renderLayer;
 
         if(layeredGameObjects.get(i).renderLayer != layerIndex){
@@ -2596,6 +2643,7 @@ class Scene {
             properLayer = new RenderLayer(goLayer);
             renderLayers.put(new RenderOrder(goLayer), properLayer);
           }
+
           properLayer.getList().add(layeredGameObjects.get(i));
           layeredGameObjects.remove(i);
         }
@@ -2642,7 +2690,7 @@ class Scene {
     renderTimer.tick();
 
     camComp.preRender();
-        
+    
     Iterator<RenderLayer> iter = renderLayers.iterator();
     while(iter.hasNext()){
       RenderLayer layer = (RenderLayer)iter.next();
