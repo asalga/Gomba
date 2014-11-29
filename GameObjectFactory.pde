@@ -72,7 +72,6 @@ class GameObjectFactory {
       // 
       player.addComponent(physicsComp);
       player.addComponent(aniComp);
-      //player.addComponent(collisionComp);
       
       player.addComponent(yBoundingBox);
       player.addComponent(xBoundingBox);
