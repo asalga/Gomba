@@ -12,7 +12,7 @@ class GameObjectFactory {
   //  - dead/kicked(falling) sprites
   //  - particle systems
   //  - HUD
-  //
+
   //  - where do squashed goombas get rendered?
 
   public GameObject create(String id) {
