@@ -13,6 +13,7 @@ class PhysicsComponent extends Component {
   PVector drag;
 
   float maxXSpeed;
+  float maxYSpeed;
   float mass;
   //
 
@@ -40,6 +41,8 @@ class PhysicsComponent extends Component {
     gravity = new PVector(0, GRAVITY_Y);
 
     maxXSpeed = 1;
+    maxYSpeed = TILE_SIZE * 20;
+
     mass = 1;
     isDynamic = true;
     atRest = false;
@@ -106,6 +109,13 @@ class PhysicsComponent extends Component {
       }
     }
 
+    if(velocity.y > maxYSpeed){
+      velocity.y = maxYSpeed;
+    }
+    else if(velocity.y <- maxYSpeed){
+      velocity.y = -maxYSpeed;
+    }
+
     position.x += velocity.x * dt;
     position.y += velocity.y * dt;
 
@@ -169,6 +179,10 @@ class PhysicsComponent extends Component {
   //
   void setMaxXSpeed(float m) {
     maxXSpeed = m;
+  }
+
+  void setMaxYSpeed(float m){
+    maxYSpeed = m;
   }
 
   void checkIfGrounded() {

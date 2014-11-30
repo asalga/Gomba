@@ -120,7 +120,7 @@ class GameObjectFactory {
       ground.addTag("structure");
 
       WrapAroundComponent c = new WrapAroundComponent();
-      ground.addComponent(c);
+     // ground.addComponent(c);
 
       BoundingBoxComponent boxComp = new BoundingBoxComponent();
       boxComp.w = TILE_SIZE;

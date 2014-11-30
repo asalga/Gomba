@@ -28,7 +28,7 @@ class Scene {
     
     player.position.set(TILE_SIZE, TILE_SIZE * 4);
     // fix tunnelling
-    //player.position.set(TILE_SIZE, height);
+    // player.position.set(TILE_SIZE, height);
 
     collisionManager = new CollisionManager();
 
@@ -284,7 +284,7 @@ class Scene {
   // TODO: find where to move this....
   void generateGroundTiles() {
     // +1 so the last tile doesn't just jump into view.
-    for (int x = -TILE_SIZE * 4; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 1); x += TILE_SIZE) {
+    for (int x = -TILE_SIZE * 4; x < TILE_SIZE * (NUM_TILES_FOR_WIDTH + 40); x += TILE_SIZE) {
       GameObject ground = gameObjectFactory.create("ground");
       ground.setPosition(x, TILE_SIZE);
       addGameObject(ground);
