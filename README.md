@@ -30,3 +30,5 @@ Resources
 * http://www.hobbygamedev.com/int/platformer-game-source-in-processing/
 * http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
 * http://www.learn-cocos2d.com/2013/08/physics-engine-platformer-terrible-idea/
+* http://www.raywenderlich.com/15230/how-to-make-a-platform-game-like-super-mario-brothers-part-1
+
